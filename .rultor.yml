@@ -1,0 +1,24 @@
+---
+docker:
+  image: g4s8/rultor-jdk11:alpine3.10
+assets:
+  settings.xml: yegor256/home#assets/artipie/settings.xml
+  pubring.gpg: yegor256/home#assets/pubring.gpg
+  secring.gpg: yegor256/home#assets/secring.gpg
+install: |
+  export LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
+  export LANGUAGE=en_US.UTF-8
+merge:
+  script: |
+    pdd -f /dev/null
+    mvn clean install -Pqulice --errors --settings ../settings.xml
+deploy:
+  script: |
+    echo There is nothing to deploy
+    exit 1
+release:
+  script: |-
+    mvn versions:set "-DnewVersion=${tag}"
+    git commit -am "${tag}"
+    mvn clean deploy -Partipie -Psonatype -Pqulice --errors --settings ../settings.xml
