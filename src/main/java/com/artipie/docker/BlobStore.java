@@ -25,25 +25,15 @@
 package com.artipie.docker;
 
 /**
- * Docker repository files and metadata.
+ * Docker registry blob store.
  * @since 1.0
- * @todo #2:30min Add manifest with tags, revision method to return
- *  manifest object.
- *  This object should work with layers revisions and tags.
- *  See SPEC.md for more details
+ * @todo #2:30min Define blob store interface:
+ *  it stores binary docker layers data in this file
+ *  layout structure: `blobs/{alg}/{prefix}/{digest}`,
+ *  where {alg} is digest algorithm name, {prefix} is first
+ *  two digits (hex) of the digest, digest is full digest of
+ *  image layer. See
+ *  github.com/docker/distribution project for more details
  */
-public interface Repo {
-
-    /**
-     * Layer link by algorithm and digest.
-     * <p>
-     * layerLinkPathSpec:
-     * <code>repositories/&lt;name&gt;/_layers/
-     * &lt;algorithm&gt;/&lt;hex digest&gt;/link</code>
-     * </p>
-     * @param alg Digest algorithm
-     * @param digest Digest hex string
-     * @return Link to layer blob
-     */
-    Link layer(String alg, String digest);
+public interface BlobStore {
 }
