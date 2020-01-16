@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 /**
- * Docker-registry Artipie adapter tests.
+ * Docker-registry Artipie adapter.
  * @since 1.0
  */
-package com.artipie;
+package com.artipie.docker;
