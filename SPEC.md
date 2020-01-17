@@ -76,7 +76,7 @@ Uploads:
 
 Blob Store:
 
-  blobsPathSpec:                  <root>/v2/blobs/
+        blobsPathSpec:                  <root>/v2/blobs/
 	blobPathSpec:                   <root>/v2/blobs/<algorithm>/<first two hex bytes of digest>/<hex digest>
 	blobDataPathSpec:               <root>/v2/blobs/<algorithm>/<first two hex bytes of digest>/<hex digest>/data
 	blobMediaTypePathSpec:          <root>/v2/blobs/<algorithm>/<first two hex bytes of digest>/<hex digest>/data
