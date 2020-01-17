@@ -31,6 +31,10 @@ import java.util.concurrent.Flow;
 /**
  * Asto {@link BlobStore} implementation.
  * @since 1.0
+ * @todo #6:30min Wait for new asto lib release
+ *  and implement methods for this class using new asto
+ *  API with `Flow` support. Don't forget to remove
+ *  supprsession for `asto` field and create unit tests.
  */
 public final class AstoBlobs implements BlobStore {
 
