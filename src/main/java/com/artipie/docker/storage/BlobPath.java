@@ -22,28 +22,41 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker;
+package com.artipie.docker.storage;
+
+import com.artipie.docker.Digest;
+import java.nio.file.Path;
 
 /**
- * Docker repository files and metadata.
+ * Blob store path.
  * @since 1.0
- * @todo #2:30min Add manifest with tags, revision method to return
- *  manifest object.
- *  This object should work with layers revisions and tags.
- *  See SPEC.md for more details
  */
-public interface Repo {
+final class BlobPath {
 
     /**
-     * Layer link by algorithm and digest.
-     * <p>
-     * layerLinkPathSpec:
-     * <code>repositories/&lt;name&gt;/_layers/
-     * &lt;algorithm&gt;/&lt;hex digest&gt;/link</code>
-     * </p>
-     * @param alg Digest algorithm
-     * @param digest Digest hex string
-     * @return Digest of layer blob
+     * Layer digest.
      */
-    Digest layer(String alg, String digest);
+    private final Digest digest;
+
+    /**
+     * Ctor.
+     * @param digest Layer digest
+     */
+    BlobPath(final Digest digest) {
+        this.digest = digest;
+    }
+
+    /**
+     * Data path.
+     * @return Path to layer data
+     */
+    public Path data() {
+        return Path.of(
+            "blobs",
+            this.digest.alg(),
+            this.digest.digest().substring(0, 2),
+            this.digest.digest(),
+            "data"
+        );
+    }
 }

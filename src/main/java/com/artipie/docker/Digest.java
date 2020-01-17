@@ -25,25 +25,50 @@
 package com.artipie.docker;
 
 /**
- * Docker repository files and metadata.
+ * Digest for image layer.
  * @since 1.0
- * @todo #2:30min Add manifest with tags, revision method to return
- *  manifest object.
- *  This object should work with layers revisions and tags.
- *  See SPEC.md for more details
  */
-public interface Repo {
+public interface Digest {
 
     /**
-     * Layer link by algorithm and digest.
-     * <p>
-     * layerLinkPathSpec:
-     * <code>repositories/&lt;name&gt;/_layers/
-     * &lt;algorithm&gt;/&lt;hex digest&gt;/link</code>
-     * </p>
-     * @param alg Digest algorithm
-     * @param digest Digest hex string
-     * @return Digest of layer blob
+     * Link digest algorithm name.
+     * @return Algorith name string
      */
-    Digest layer(String alg, String digest);
+    String alg();
+
+    /**
+     * Link digest hex.
+     * @return Link digest hex string
+     */
+    String digest();
+
+    /**
+     * SHA256 digest implementation.
+     * @since 1.0
+     */
+    final class Sha256 implements Digest {
+
+        /**
+         * SHA256 hex string.
+         */
+        private final String hex;
+
+        /**
+         * Ctor.
+         * @param hex SHA256 hex string
+         */
+        public Sha256(final String hex) {
+            this.hex = hex;
+        }
+
+        @Override
+        public String alg() {
+            return "sha256";
+        }
+
+        @Override
+        public String digest() {
+            return this.hex;
+        }
+    }
 }

@@ -22,28 +22,34 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker;
+package com.artipie.docker.storage;
+
+import com.artipie.docker.Digest;
+import com.yegor256.asto.Storage;
+import java.util.concurrent.Flow;
 
 /**
- * Docker repository files and metadata.
+ * Asto {@link BlobStore} implementation.
  * @since 1.0
- * @todo #2:30min Add manifest with tags, revision method to return
- *  manifest object.
- *  This object should work with layers revisions and tags.
- *  See SPEC.md for more details
  */
-public interface Repo {
+public final class AstoBlobs implements BlobStore {
 
     /**
-     * Layer link by algorithm and digest.
-     * <p>
-     * layerLinkPathSpec:
-     * <code>repositories/&lt;name&gt;/_layers/
-     * &lt;algorithm&gt;/&lt;hex digest&gt;/link</code>
-     * </p>
-     * @param alg Digest algorithm
-     * @param digest Digest hex string
-     * @return Digest of layer blob
+     * Storage.
      */
-    Digest layer(String alg, String digest);
+    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+    private final Storage asto;
+
+    /**
+     * Ctor.
+     * @param asto Storage
+     */
+    public AstoBlobs(final Storage asto) {
+        this.asto = asto;
+    }
+
+    @Override
+    public void load(final Digest digest, final Flow.Subscriber<Byte> out) {
+        out.onComplete();
+    }
 }
