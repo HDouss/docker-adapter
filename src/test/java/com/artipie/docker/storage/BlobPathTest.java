@@ -21,24 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.artipie.docker.storage;
 
-package com.artipie.docker;
+import com.artipie.docker.Digest;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Test;
 
 /**
- * Link to Docker image layer.
+ * Test case for {@link BlobPathTest}.
  * @since 1.0
  */
-public interface Link {
+public final class BlobPathTest {
 
-    /**
-     * Link digest algorithm name.
-     * @return Algorith name string
-     */
-    String alg();
-
-    /**
-     * Link digest hex.
-     * @return Link digest hex string
-     */
-    String digest();
+    @Test
+    public void buildsValidPathFromDigest() throws Exception {
+        final String hex =
+            "00801519ca78ec3ac54f0aea959bce240ab3b42fae7727d2359b1f9ebcabe23d";
+        MatcherAssert.assertThat(
+            new BlobPath(new Digest.Sha256(hex)).data().toString(),
+            CoreMatchers.equalTo(
+                String.join(
+                    "/",
+                    "blobs", "sha256", "00", hex, "data"
+                )
+            )
+        );
+    }
 }
