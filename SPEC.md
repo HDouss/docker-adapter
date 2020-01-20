@@ -96,11 +96,6 @@ contents, please see the path spec documentation.
 
 ## Repository name
 
-<!--
-@todo #1:30min Implement `RepoName` class according to repo name specification (see below),
- it should verify the name against provided regular expression. Add unit tests.
--->
-
 Classically, repository names have always been two path components where each path component
 is less than 30 characters.
 The V2 registry API does not enforce this.

@@ -24,6 +24,8 @@
 
 package com.artipie.docker;
 
+import java.util.regex.Pattern;
+
 /**
  * Docker repository name.
  * @since 1.0
@@ -35,4 +37,81 @@ public interface RepoName {
      * @return Name as string
      */
     String string();
+
+    /**
+     * Valid repo name.
+     * <p>
+     * Classically, repository names have always been two path components
+     * where each path component is less than 30 characters.
+     * The V2 registry API does not enforce this.
+     * The rules for a repository name are as follows:
+     * <ul>
+     * <li>A repository name is broken up into path components</li>
+     * <li>A component of a repository name must be at least one lowercase,
+     * alpha-numeric characters, optionally separated by periods,
+     * dashes or underscores.More strictly,
+     * it must match the regular expression:
+     * {@code [a-z0-9]+(?:[._-][a-z0-9]+)*}</li>
+     * <li>If a repository name has two or more path components,
+     * they must be separated by a forward slash {@code /}</li>
+     * <li>The total length of a repository name, including slashes,
+     * must be less than 256 characters</li>
+     * </ul>
+     * </p>
+     * @since 1.0
+     * @todo #13:30min Wait for PR with junit5 to be merged and implement
+     *  unit tests for this class. It should include checks agains repo name length,
+     *  lading or trailing slashes, invalid path parts and empty name.
+     */
+    final class Valid implements RepoName {
+
+        /**
+         * Repository name part pattern.
+         */
+        private static final Pattern PART_PTN =
+            Pattern.compile("[a-z0-9]+(?:[._-][a-z0-9]+)*}");
+
+        /**
+         * Repository name max length.
+         */
+        private static final int MAX_NAME_LEN = 256;
+
+        /**
+         * Source string.
+         */
+        private final String src;
+
+        /**
+         * Ctor.
+         * @param src Source string
+         */
+        public Valid(final String src) {
+            this.src = src;
+        }
+
+        @Override
+        public String string() {
+            final int len = this.src.length();
+            if (len >= RepoName.Valid.MAX_NAME_LEN) {
+                throw new IllegalStateException("repo name must be less than 256 chars");
+            }
+            if (this.src.charAt(len - 1) == '/') {
+                throw new IllegalStateException(
+                    "repo name can't end with a slash"
+                );
+            }
+            final String[] parts = this.src.split("/");
+            if (parts.length < 1) {
+                throw new IllegalStateException("repo name can't be empty");
+            }
+            for (final String part : parts) {
+                if (!RepoName.Valid.PART_PTN.matcher(part).matches()) {
+                    throw new IllegalStateException(
+                        String.format("invalid repo name part: %s", part)
+                    );
+                }
+            }
+            return this.src;
+        }
+    }
 }
