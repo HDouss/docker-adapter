@@ -90,6 +90,7 @@ public interface RepoName {
         }
 
         @Override
+        @SuppressWarnings("PMD.CyclomaticComplexity")
         public String string() {
             final int len = this.src.length();
             if (len >= RepoName.Valid.MAX_NAME_LEN) {
