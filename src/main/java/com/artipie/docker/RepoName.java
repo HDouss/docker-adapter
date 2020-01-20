@@ -36,7 +36,7 @@ public interface RepoName {
      * Name string.
      * @return Name as string
      */
-    String string();
+    String value();
 
     /**
      * Valid repo name.
@@ -91,7 +91,7 @@ public interface RepoName {
 
         @Override
         @SuppressWarnings("PMD.CyclomaticComplexity")
-        public String string() {
+        public String value() {
             final int len = this.src.length();
             if (len >= RepoName.Valid.MAX_NAME_LEN) {
                 throw new IllegalStateException("repo name must be less than 256 chars");
@@ -102,7 +102,7 @@ public interface RepoName {
                 );
             }
             final String[] parts = this.src.split("/");
-            if (parts.length < 1) {
+            if (parts.length == 0) {
                 throw new IllegalStateException("repo name can't be empty");
             }
             for (final String part : parts) {
