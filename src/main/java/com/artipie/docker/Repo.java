@@ -27,10 +27,6 @@ package com.artipie.docker;
 /**
  * Docker repository files and metadata.
  * @since 1.0
- * @todo #2:30min Add manifest with tags, revision method to return
- *  manifest object.
- *  This object should work with layers revisions and tags.
- *  See SPEC.md for more details
  */
 public interface Repo {
 
