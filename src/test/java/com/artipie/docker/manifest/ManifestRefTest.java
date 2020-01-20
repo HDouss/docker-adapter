@@ -21,31 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.docker.storage;
 
-import com.artipie.docker.Digest;
+package com.artipie.docker.manifest;
+
+import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test case for {@link BlobPathTest}.
+ * Test case for {@link ManifestRef}.
  * @since 1.0
  */
-public final class BlobPathTest {
+public final class ManifestRefTest {
+    @Test
+    void resolvesDigestLink() {
+        MatcherAssert.assertThat(
+            new ManifestRef.Digest("sha256", "0000").path(),
+            Matchers.equalTo(Path.of("revisions/sha256/0000/link"))
+        );
+    }
 
     @Test
-    public void buildsValidPathFromDigest() throws Exception {
-        final String hex =
-            "00801519ca78ec3ac54f0aea959bce240ab3b42fae7727d2359b1f9ebcabe23d";
+    void resolvesTagLink() {
         MatcherAssert.assertThat(
-            new BlobPath(new Digest.Sha256(hex)).data().toString(),
-            Matchers.equalTo(
-                String.join(
-                    "/",
-                    "blobs", "sha256", "00", hex, "data"
-                )
-            )
+            new ManifestRef.Tag("latest").path(),
+            Matchers.equalTo(Path.of("tags/latest/current/link"))
         );
     }
 }

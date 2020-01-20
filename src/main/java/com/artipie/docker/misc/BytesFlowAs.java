@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
+package com.artipie.docker.misc;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;

@@ -116,10 +116,11 @@ The rules for a repository name are as follows:
 
 ## Manifest resolution strategy
 
-<--
-@todo #7:30min Implement manifest resolution according to the specification (see below).
- Use `AsyncManifest` object to read JSON content from ASTO storage by converting it from
- bytes to JSON. Put corresponding methods or objects in `Repo` interface. Add unit tests.
+<!--
+@todo #12:30min Continue implementing manifest resolution according to the specification
+ (see below). Manifest reference link can be resolved using `ManifestRef` class.
+ `BytesFlowAs.JsonObject` can be used to read manifest content from ASTO storage.
+ Put corresponding methods or objects in `Repo` interface. Add unit tests.
 -->
 
 Manifest can be resolved by repo "name" and "reference". The reference may include a tag

@@ -24,6 +24,10 @@
 
 package com.artipie.docker;
 
+import com.artipie.docker.manifest.ManifestRef;
+import java.util.concurrent.CompletableFuture;
+import javax.json.JsonObject;
+
 /**
  * Docker repository files and metadata.
  * @since 1.0
@@ -42,4 +46,11 @@ public interface Repo {
      * @return Digest of layer blob
      */
     Digest layer(String alg, String digest);
+
+    /**
+     * Resolve docker image manifest file by reference link.
+     * @param link Manifest reference link
+     * @return Future with manifest JSON object
+     */
+    CompletableFuture<JsonObject> manifest(ManifestRef link);
 }
