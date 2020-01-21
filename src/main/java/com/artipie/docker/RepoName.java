@@ -79,29 +79,38 @@ public interface RepoName {
         /**
          * Source string.
          */
-        private final String src;
+        private final RepoName origin;
 
         /**
          * Ctor.
-         * @param src Source string
+         * @param name Repo name string
          */
-        public Valid(final String src) {
-            this.src = src;
+        public Valid(final String name) {
+            this(new RepoName.Simple(name));
+        }
+
+        /**
+         * Ctor.
+         * @param origin Origin repo name
+         */
+        public Valid(final RepoName origin) {
+            this.origin = origin;
         }
 
         @Override
         @SuppressWarnings("PMD.CyclomaticComplexity")
         public String value() {
-            final int len = this.src.length();
+            final String src = this.origin.value();
+            final int len = src.length();
             if (len >= RepoName.Valid.MAX_NAME_LEN) {
                 throw new IllegalStateException("repo name must be less than 256 chars");
             }
-            if (this.src.charAt(len - 1) == '/') {
+            if (src.charAt(len - 1) == '/') {
                 throw new IllegalStateException(
                     "repo name can't end with a slash"
                 );
             }
-            final String[] parts = this.src.split("/");
+            final String[] parts = src.split("/");
             if (parts.length == 0) {
                 throw new IllegalStateException("repo name can't be empty");
             }
@@ -112,7 +121,32 @@ public interface RepoName {
                     );
                 }
             }
-            return this.src;
+            return src;
+        }
+    }
+
+    /**
+     * Simple repo name. Can be used for tests as fake object.
+     * @since 1.0
+     */
+    final class Simple implements RepoName {
+
+        /**
+         * Repository name string.
+         */
+        private final String name;
+
+        /**
+         * Ctor.
+         * @param name Repo name string
+         */
+        public Simple(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String value() {
+            return this.name;
         }
     }
 }
