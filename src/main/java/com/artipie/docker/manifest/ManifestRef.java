@@ -62,7 +62,7 @@ public interface ManifestRef {
 
         @Override
         public URI path() {
-            return URI.create(String.join("/", "tags", this.tag, "current", "link"));
+            return URI.create(String.join("/", "tags", this.tag, "current/link"));
         }
     }
 

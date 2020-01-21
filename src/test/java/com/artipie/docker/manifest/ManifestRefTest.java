@@ -24,9 +24,7 @@
 
 package com.artipie.docker.manifest;
 
-
 import java.net.URI;
-
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
