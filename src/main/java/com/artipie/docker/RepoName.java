@@ -24,6 +24,8 @@
 
 package com.artipie.docker;
 
+import java.util.regex.Pattern;
+
 /**
  * Docker repository name.
  * @since 1.0
@@ -34,5 +36,117 @@ public interface RepoName {
      * Name string.
      * @return Name as string
      */
-    String string();
+    String value();
+
+    /**
+     * Valid repo name.
+     * <p>
+     * Classically, repository names have always been two path components
+     * where each path component is less than 30 characters.
+     * The V2 registry API does not enforce this.
+     * The rules for a repository name are as follows:
+     * <ul>
+     * <li>A repository name is broken up into path components</li>
+     * <li>A component of a repository name must be at least one lowercase,
+     * alpha-numeric characters, optionally separated by periods,
+     * dashes or underscores.More strictly,
+     * it must match the regular expression:
+     * {@code [a-z0-9]+(?:[._-][a-z0-9]+)*}</li>
+     * <li>If a repository name has two or more path components,
+     * they must be separated by a forward slash {@code /}</li>
+     * <li>The total length of a repository name, including slashes,
+     * must be less than 256 characters</li>
+     * </ul>
+     * </p>
+     * @since 1.0
+     * @todo #13:30min Wait for PR with junit5 to be merged and implement
+     *  unit tests for this class. It should include checks agains repo name length,
+     *  lading or trailing slashes, invalid path parts and empty name.
+     */
+    final class Valid implements RepoName {
+
+        /**
+         * Repository name part pattern.
+         */
+        private static final Pattern PART_PTN =
+            Pattern.compile("[a-z0-9]+(?:[._-][a-z0-9]+)*}");
+
+        /**
+         * Repository name max length.
+         */
+        private static final int MAX_NAME_LEN = 256;
+
+        /**
+         * Source string.
+         */
+        private final RepoName origin;
+
+        /**
+         * Ctor.
+         * @param name Repo name string
+         */
+        public Valid(final String name) {
+            this(new RepoName.Simple(name));
+        }
+
+        /**
+         * Ctor.
+         * @param origin Origin repo name
+         */
+        public Valid(final RepoName origin) {
+            this.origin = origin;
+        }
+
+        @Override
+        @SuppressWarnings("PMD.CyclomaticComplexity")
+        public String value() {
+            final String src = this.origin.value();
+            final int len = src.length();
+            if (len >= RepoName.Valid.MAX_NAME_LEN) {
+                throw new IllegalStateException("repo name must be less than 256 chars");
+            }
+            if (src.charAt(len - 1) == '/') {
+                throw new IllegalStateException(
+                    "repo name can't end with a slash"
+                );
+            }
+            final String[] parts = src.split("/");
+            if (parts.length == 0) {
+                throw new IllegalStateException("repo name can't be empty");
+            }
+            for (final String part : parts) {
+                if (!RepoName.Valid.PART_PTN.matcher(part).matches()) {
+                    throw new IllegalStateException(
+                        String.format("invalid repo name part: %s", part)
+                    );
+                }
+            }
+            return src;
+        }
+    }
+
+    /**
+     * Simple repo name. Can be used for tests as fake object.
+     * @since 1.0
+     */
+    final class Simple implements RepoName {
+
+        /**
+         * Repository name string.
+         */
+        private final String name;
+
+        /**
+         * Ctor.
+         * @param name Repo name string
+         */
+        public Simple(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String value() {
+            return this.name;
+        }
+    }
 }
