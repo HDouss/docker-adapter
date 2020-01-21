@@ -24,7 +24,7 @@
 
 package com.artipie.docker.manifest;
 
-import java.nio.file.Path;
+import java.net.URI;
 
 /**
  * Manifest link reference.
@@ -39,7 +39,7 @@ public interface ManifestRef {
      * Path to manifest link.
      * @return Relative path for manifest link
      */
-    Path path();
+    URI path();
 
     /**
      * Manifest link from tag.
@@ -61,8 +61,8 @@ public interface ManifestRef {
         }
 
         @Override
-        public Path path() {
-            return Path.of("tags", this.tag, "current/link");
+        public URI path() {
+            return URI.create(String.join("/", "tags", this.tag, "current", "link"));
         }
     }
 
@@ -93,8 +93,8 @@ public interface ManifestRef {
         }
 
         @Override
-        public Path path() {
-            return Path.of("revisions", this.alg, this.hex, "link");
+        public URI path() {
+            return URI.create(String.join("/", "revisions", this.alg, this.hex, "link"));
         }
     }
 }

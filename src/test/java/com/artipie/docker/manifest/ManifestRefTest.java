@@ -24,7 +24,9 @@
 
 package com.artipie.docker.manifest;
 
-import java.nio.file.Path;
+
+import java.net.URI;
+
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -38,7 +40,7 @@ public final class ManifestRefTest {
     void resolvesDigestLink() {
         MatcherAssert.assertThat(
             new ManifestRef.Digest("sha256", "0000").path(),
-            Matchers.equalTo(Path.of("revisions/sha256/0000/link"))
+            Matchers.equalTo(URI.create("revisions/sha256/0000/link"))
         );
     }
 
@@ -46,7 +48,7 @@ public final class ManifestRefTest {
     void resolvesTagLink() {
         MatcherAssert.assertThat(
             new ManifestRef.Tag("latest").path(),
-            Matchers.equalTo(Path.of("tags/latest/current/link"))
+            Matchers.equalTo(URI.create("tags/latest/current/link"))
         );
     }
 }
