@@ -25,7 +25,7 @@
 package com.artipie.docker;
 
 import com.artipie.docker.manifest.ManifestRef;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 import javax.json.JsonObject;
 
 /**
@@ -52,5 +52,5 @@ public interface Repo {
      * @param link Manifest reference link
      * @return Future with manifest JSON object
      */
-    CompletionStage<JsonObject> manifest(ManifestRef link);
+    CompletableFuture<JsonObject> manifest(ManifestRef link);
 }

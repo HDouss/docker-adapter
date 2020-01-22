@@ -30,7 +30,7 @@ import com.artipie.docker.Repo;
 import com.artipie.docker.manifest.ManifestRef;
 import com.artipie.docker.misc.BytesFlowAs;
 import java.nio.file.Path;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 import javax.json.JsonObject;
 
 /**
@@ -66,7 +66,7 @@ public final class AstoRepo implements Repo {
     }
 
     @Override
-    public CompletionStage<JsonObject> manifest(final ManifestRef link) {
+    public CompletableFuture<JsonObject> manifest(final ManifestRef link) {
         return this.asto.value(AstoRepo.REPO_BASE.resolve(link.path().toASCIIString()).toString())
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(text -> new Digest.FromLink(text))
