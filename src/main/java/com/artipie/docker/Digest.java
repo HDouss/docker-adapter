@@ -74,30 +74,53 @@ public interface Digest {
 
     /**
      * Digest parsed from link reference.
+     * <p>
+     * Docker registry link is a text file with digest formatted
+     * by joining algorithm name with hex string using {@code :} as separator.
+     * E.g. if algorihm is {@code sha256} and the digest is {@code 0000}, the link will be
+     * {@code sha256:0000}.
      * @since 1.0
-     * @todo #17:30min Implement this class. It should parse input string
-     *  and split it onto two parts: algorithm name and digest hex.
-     *  Algorith and digest are splitted by `:` char.
-     *  Don't forget to add javadoc and unit test.
      */
-    @SuppressWarnings("PMD.UnusedFormalParameter")
     final class FromLink implements Digest {
+
+        /**
+         * Digest link.
+         */
+        private final String link;
+
         /**
          * Ctor.
          * @param link Link reference
          */
         public FromLink(final String link) {
-            // not implemented
+            this.link = link;
         }
 
         @Override
         public String alg() {
-            throw new IllegalStateException("alg() not implemented");
+            return this.part(0);
         }
 
         @Override
         public String digest() {
-            throw new IllegalStateException("digest() not implemented");
+            return this.part(1);
+        }
+
+        /**
+         * Part from input string splitted by {@code :}.
+         * @param pos Part position
+         * @return Part
+         */
+        private String part(final int pos) {
+            final String[] parts = this.link.split(":");
+            if (parts.length != 2) {
+                throw new IllegalStateException(
+                    String.format(
+                        "Broken link, expected two parts separated by `:`, but was %s", this.link
+                    )
+                );
+            }
+            return parts[pos];
         }
     }
 }
