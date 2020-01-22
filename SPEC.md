@@ -111,13 +111,6 @@ The rules for a repository name are as follows:
 
 ## Manifest resolution strategy
 
-<!--
-@todo #12:30min Continue implementing manifest resolution according to the specification
- (see below). Manifest reference link can be resolved using `ManifestRef` class.
- `BytesFlowAs.JsonObject` can be used to read manifest content from ASTO storage.
- Put corresponding methods or objects in `Repo` interface. Add unit tests.
--->
-
 Manifest can be resolved by repo "name" and "reference". The reference may include a tag
 or digest. Manifest represented as a JSON object. It can be resolved using these steps:
  1. Resolve tag or reference by reading a file at

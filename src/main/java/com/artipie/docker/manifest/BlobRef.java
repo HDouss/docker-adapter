@@ -26,28 +26,36 @@ package com.artipie.docker.manifest;
 
 import com.artipie.docker.Digest;
 import java.net.URI;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 
 /**
- * Test case for {@link ManifestRef}.
+ * Blob reference.
+ * <p>
+ * Can be resolved by blob digest.
  * @since 1.0
  */
-public final class ManifestRefTest {
-    @Test
-    void resolvesDigestLink() {
-        MatcherAssert.assertThat(
-            new ManifestRef(new Digest.Sha256("0000")).path(),
-            Matchers.equalTo(URI.create("revisions/sha256/0000/link"))
-        );
+public final class BlobRef implements RefPath {
+
+    /**
+     * Blob digest.
+     */
+    private final Digest digest;
+
+    /**
+     * Ctor.
+     * @param digest Blob digest
+     */
+    public BlobRef(final Digest digest) {
+        this.digest = digest;
     }
 
-    @Test
-    void resolvesTagLink() {
-        MatcherAssert.assertThat(
-            new ManifestRef("latest").path(),
-            Matchers.equalTo(URI.create("tags/latest/current/link"))
+    @Override
+    public URI path() {
+        return URI.create(
+            String.format(
+                "blobs/%s/%s/%s",
+                this.digest.alg(),
+                this.digest.digest().substring(0, 2)
+            )
         );
     }
 }

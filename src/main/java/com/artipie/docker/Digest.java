@@ -71,4 +71,33 @@ public interface Digest {
             return this.hex;
         }
     }
+
+    /**
+     * Digest parsed from link reference.
+     * @since 1.0
+     * @todo #17:30min Implement this class. It should parse input string
+     *  and split it onto two parts: algorithm name and digest hex.
+     *  Algorith and digest are splitted by `:` char.
+     *  Don't forget to add javadoc and unit test.
+     */
+    @SuppressWarnings("PMD.UnusedFormalParameter")
+    final class FromLink implements Digest {
+        /**
+         * Ctor.
+         * @param link Link reference
+         */
+        public FromLink(final String link) {
+            // not implemented
+        }
+
+        @Override
+        public String alg() {
+            throw new IllegalStateException("alg() not implemented");
+        }
+
+        @Override
+        public String digest() {
+            throw new IllegalStateException("digest() not implemented");
+        }
+    }
 }

@@ -26,34 +26,52 @@ package com.artipie.docker.storage;
 
 import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
-import java.util.concurrent.Flow;
+import com.artipie.docker.Repo;
+import com.artipie.docker.manifest.ManifestRef;
+import com.artipie.docker.misc.BytesFlowAs;
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+import javax.json.JsonObject;
 
 /**
- * Asto {@link BlobStore} implementation.
+ * Asto implementation of {@link Repo}.
  * @since 1.0
- * @todo #6:30min Wait for new asto lib release
- *  and implement methods for this class using new asto
- *  API with `Flow` support. Don't forget to remove
- *  supprsession for `asto` field and create unit tests.
  */
-public final class AstoBlobs implements BlobStore {
+public final class AstoRepo implements Repo {
 
     /**
-     * Storage.
+     * Base repos path.
+     * <p>
+     * It should be decoupled from {@link java.nio.Path} with #18 ticket.
+     * </p>
      */
-    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+    private static final Path REPO_BASE = Path.of("docker/registry/v2/repositories");
+
+    /**
+     * Asto storage.
+     */
     private final Storage asto;
 
     /**
      * Ctor.
-     * @param asto Storage
+     * @param asto Asto storage
      */
-    public AstoBlobs(final Storage asto) {
+    public AstoRepo(final Storage asto) {
         this.asto = asto;
     }
 
     @Override
-    public void load(final Digest digest, final Flow.Subscriber<Byte> out) {
-        out.onComplete();
+    public Digest layer(final String alg, final String digest) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public CompletableFuture<JsonObject> manifest(final ManifestRef link) {
+        return this.asto.value(AstoRepo.REPO_BASE.resolve(link.path().toASCIIString()).toString())
+            .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
+            .thenApply(text -> new Digest.FromLink(text))
+            .thenApply(digest -> new BlobPath(digest))
+            .thenCompose(path -> this.asto.value(path.toString()))
+            .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
     }
 }
