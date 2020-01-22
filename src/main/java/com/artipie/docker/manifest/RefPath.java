@@ -24,30 +24,17 @@
 
 package com.artipie.docker.manifest;
 
-import com.artipie.docker.Digest;
 import java.net.URI;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 
 /**
- * Test case for {@link ManifestRef}.
+ * Registry reference path URI.
  * @since 1.0
  */
-public final class ManifestRefTest {
-    @Test
-    void resolvesDigestLink() {
-        MatcherAssert.assertThat(
-            new ManifestRef(new Digest.Sha256("0000")).path(),
-            Matchers.equalTo(URI.create("revisions/sha256/0000/link"))
-        );
-    }
+public interface RefPath {
 
-    @Test
-    void resolvesTagLink() {
-        MatcherAssert.assertThat(
-            new ManifestRef("latest").path(),
-            Matchers.equalTo(URI.create("tags/latest/current/link"))
-        );
-    }
+    /**
+     * URI path for reference.
+     * @return URI
+     */
+    URI path();
 }

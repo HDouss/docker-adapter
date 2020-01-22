@@ -25,6 +25,8 @@
 package com.artipie.docker.misc;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -171,6 +173,30 @@ public abstract class BytesFlowAs<T> {
                 flow,
                 bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
             );
+        }
+    }
+
+    /**
+     * Bytes as text.
+     * @since 1.0
+     */
+    public static final class Text extends BytesFlowAs<String> {
+
+        /**
+         * Bytes as text with UTF-8 encoding.
+         * @param flow Bytes flow
+         */
+        public Text(final Flow.Publisher<Byte> flow) {
+            this(flow, StandardCharsets.UTF_8);
+        }
+
+        /**
+         * Bytes as text with specified charset.
+         * @param flow Bytes flow
+         * @param charset Text encoding
+         */
+        public Text(final Flow.Publisher<Byte> flow, final Charset charset) {
+            super(flow, bytes -> new String(bytes, charset));
         }
     }
 }

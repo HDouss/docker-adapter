@@ -24,7 +24,11 @@
 
 package com.artipie.docker.manifest;
 
+import com.artipie.docker.Digest;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Manifest link reference.
@@ -33,68 +37,44 @@ import java.net.URI;
  * </p>
  * @since 1.0
  */
-public interface ManifestRef {
+public final class ManifestRef implements RefPath {
 
     /**
-     * Path to manifest link.
-     * @return Relative path for manifest link
+     * Path parts.
      */
-    URI path();
+    private final List<String> parts;
 
     /**
-     * Manifest link from tag.
-     * @since 1.0
+     * Manifest link from a digest.
+     * @param digest Digest
      */
-    final class Tag implements ManifestRef {
-
-        /**
-         * Image tag.
-         */
-        private final String tag;
-
-        /**
-         * Ctor.
-         * @param tag Image tag
-         */
-        public Tag(final String tag) {
-            this.tag = tag;
-        }
-
-        @Override
-        public URI path() {
-            return URI.create(String.join("/", "tags", this.tag, "current/link"));
-        }
+    public ManifestRef(final Digest digest) {
+        this(
+            Arrays.asList("revisions", digest.alg(), digest.digest(), "link")
+        );
     }
 
     /**
-     * Manifest link from digest.
-     * @since 1.0
+     * Manifest link from a tag.
+     * @param tag Name
      */
-    final class Digest implements ManifestRef {
+    public ManifestRef(final String tag) {
+        this(
+            Arrays.asList("tags", tag, "current/link")
+        );
+    }
 
-        /**
-         * Digest algorithm.
-         */
-        private final String alg;
+    /**
+     * Primary constructor.
+     * @param parts Path parts
+     */
+    private ManifestRef(final List<String> parts) {
+        this.parts = Collections.unmodifiableList(parts);
+    }
 
-        /**
-         * Digest hex.
-         */
-        private final String hex;
-
-        /**
-         * Manifest reference from digest.
-         * @param alg Diges algorithm name
-         * @param hex Digest encoded to hex string
-         */
-        public Digest(final String alg, final String hex) {
-            this.alg = alg;
-            this.hex = hex;
-        }
-
-        @Override
-        public URI path() {
-            return URI.create(String.join("/", "revisions", this.alg, this.hex, "link"));
-        }
+    @Override
+    public URI path() {
+        return URI.create(String.join("/", this.parts));
     }
 }
+
