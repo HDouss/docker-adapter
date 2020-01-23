@@ -46,7 +46,7 @@ public final class AstoRepo implements Repo {
      * It should be decoupled from {@link java.nio.Path} with #18 ticket.
      * </p>
      */
-    private static final Path REPO_BASE = Path.of("docker/registry/v2/repositories");
+    private static final Path REPO_BASE = Path.of("docker/registry/v2");
 
     /**
      * Asto storage.
@@ -69,6 +69,7 @@ public final class AstoRepo implements Repo {
     @Override
     public CompletableFuture<JsonObject> manifest(final RepoName name, final ManifestRef link) {
         final String path = AstoRepo.REPO_BASE
+            .resolve("repositories")
             .resolve(name.value())
             .resolve("_manifests")
             .resolve(link.path().toASCIIString())
@@ -77,7 +78,10 @@ public final class AstoRepo implements Repo {
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(text -> new Digest.FromLink(text))
             .thenApply(digest -> new BlobPath(digest))
-            .thenCompose(blob -> this.asto.value(blob.data().toString()))
-            .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
+            .thenCompose(
+                blob -> this.asto.value(
+                    AstoRepo.REPO_BASE.resolve(blob.data()).toString()
+                )
+            ).thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
     }
 }

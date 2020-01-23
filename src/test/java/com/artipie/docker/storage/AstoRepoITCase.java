@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Test;
  *  works correctly. But blob path resolution is wrong. It's trying to access
  *  blob from manifest link by wrong path. Fix it and enable the test.
  */
-@Disabled
 public final class AstoRepoITCase {
 
     @Test
