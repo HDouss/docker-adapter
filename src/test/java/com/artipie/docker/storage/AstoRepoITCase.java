@@ -26,6 +26,7 @@ package com.artipie.docker.storage;
 
 import com.artipie.asto.FileStorage;
 import com.artipie.docker.Repo;
+import com.artipie.docker.RepoName;
 import com.artipie.docker.manifest.ManifestRef;
 import java.nio.file.Path;
 import javax.json.JsonObject;
@@ -37,10 +38,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Integration tests for {@link AstoRepo}.
  * @since 1.0
- * @todo #27:30min This test is failing. Most probably because we don't include repo name
- *  in manifest path. Manifest path should be
- *  `docker/registry/v2/repositories/test/manifest/tags/1/current/link` in this test.
- *  Fix it and remove Disable annotation.
+ * @todo #29:30min This test is failing. Manifest resolution was fixed and it
+ *  works correctly. But blob path resolution is wrong. It's trying to access
+ *  blob from manifest link by wrong path. Fix it and enable the test.
  */
 @Disabled
 public final class AstoRepoITCase {
@@ -50,9 +50,11 @@ public final class AstoRepoITCase {
         final Path dir = Path.of(
             Thread.currentThread().getContextClassLoader()
                 .getResource("docker").getFile()
-        );
+        ).getParent();
         final Repo repo = new AstoRepo(new FileStorage(dir));
-        final JsonObject json = repo.manifest(new ManifestRef("1")).get();
+        final JsonObject json = repo.manifest(
+            new RepoName.Simple("test"), new ManifestRef("1")
+        ).get();
         MatcherAssert.assertThat(
             json.getJsonObject("config").getString("digest"),
             Matchers.is("sha256:e56378c5af5160fd8b7d8ad97a9c0aeef08ed31abcc431048c876602e1bdac4d")

@@ -49,8 +49,9 @@ public interface Repo {
 
     /**
      * Resolve docker image manifest file by reference link.
+     * @param name Repository name
      * @param link Manifest reference link
      * @return Future with manifest JSON object
      */
-    CompletableFuture<JsonObject> manifest(ManifestRef link);
+    CompletableFuture<JsonObject> manifest(RepoName name, ManifestRef link);
 }

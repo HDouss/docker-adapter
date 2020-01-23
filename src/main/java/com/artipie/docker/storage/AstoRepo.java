@@ -27,6 +27,7 @@ package com.artipie.docker.storage;
 import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Repo;
+import com.artipie.docker.RepoName;
 import com.artipie.docker.manifest.ManifestRef;
 import com.artipie.docker.misc.BytesFlowAs;
 import java.nio.file.Path;
@@ -66,12 +67,17 @@ public final class AstoRepo implements Repo {
     }
 
     @Override
-    public CompletableFuture<JsonObject> manifest(final ManifestRef link) {
-        return this.asto.value(AstoRepo.REPO_BASE.resolve(link.path().toASCIIString()).toString())
+    public CompletableFuture<JsonObject> manifest(final RepoName name, final ManifestRef link) {
+        final String path = AstoRepo.REPO_BASE
+            .resolve(name.value())
+            .resolve("_manifests")
+            .resolve(link.path().toASCIIString())
+            .toString();
+        return this.asto.value(path)
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(text -> new Digest.FromLink(text))
             .thenApply(digest -> new BlobPath(digest))
-            .thenCompose(path -> this.asto.value(path.toString()))
+            .thenCompose(blob -> this.asto.value(blob.data().toString()))
             .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
     }
 }
