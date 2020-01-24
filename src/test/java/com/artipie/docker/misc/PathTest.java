@@ -22,41 +22,31 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.storage;
+package com.artipie.docker.misc;
 
-import com.artipie.docker.Digest;
-import com.artipie.docker.misc.Path;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
 
 /**
- * Blob store path.
+ * Test case for {@link Path}.
  * @since 1.0
  */
-final class BlobPath implements Path {
+public final class PathTest {
 
-    /**
-     * Layer digest.
-     */
-    private final Digest digest;
-
-    /**
-     * Ctor.
-     * @param digest Layer digest
-     */
-    BlobPath(final Digest digest) {
-        this.digest = digest;
+    @Test
+    void resolvesKeyFromParts() {
+        MatcherAssert.assertThat(
+            new Path.From("one", "two", "three").key(),
+            Matchers.equalTo("one/two/three")
+        );
     }
 
-    /**
-     * Data key.
-     * @return Key for layer data
-     */
-    public String key() {
-        return new Path.From(
-            "blobs",
-            this.digest.alg(),
-            this.digest.digest().substring(0, 2),
-            this.digest.digest(),
-            "data"
-        ).key();
+    @Test
+    void resovlesKeyFromBasePath() {
+        MatcherAssert.assertThat(
+            new Path.From(new Path.From("black", "red"), "green", "yellow").key(),
+            Matchers.equalTo("black/red/green/yellow")
+        );
     }
 }

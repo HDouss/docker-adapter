@@ -22,41 +22,9 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.storage;
-
-import com.artipie.docker.Digest;
-import com.artipie.docker.misc.Path;
-
 /**
- * Blob store path.
+ * Tests for misc objects.
  * @since 1.0
  */
-final class BlobPath implements Path {
+package com.artipie.docker.misc;
 
-    /**
-     * Layer digest.
-     */
-    private final Digest digest;
-
-    /**
-     * Ctor.
-     * @param digest Layer digest
-     */
-    BlobPath(final Digest digest) {
-        this.digest = digest;
-    }
-
-    /**
-     * Data key.
-     * @return Key for layer data
-     */
-    public String key() {
-        return new Path.From(
-            "blobs",
-            this.digest.alg(),
-            this.digest.digest().substring(0, 2),
-            this.digest.digest(),
-            "data"
-        ).key();
-    }
-}

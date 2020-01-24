@@ -30,7 +30,7 @@ import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.manifest.ManifestRef;
 import com.artipie.docker.misc.BytesFlowAs;
-import java.nio.file.Path;
+import com.artipie.docker.misc.Path;
 import java.util.concurrent.CompletableFuture;
 import javax.json.JsonObject;
 
@@ -42,11 +42,9 @@ public final class AstoRepo implements Repo {
 
     /**
      * Base repos path.
-     * <p>
-     * It should be decoupled from {@link java.nio.Path} with #18 ticket.
-     * </p>
      */
-    private static final Path REPO_BASE = Path.of("docker/registry/v2/repositories");
+    private static final Path REPO_BASE =
+        new Path.From("docker", "registry", "v2", "repositories");
 
     /**
      * Asto storage.
@@ -68,16 +66,14 @@ public final class AstoRepo implements Repo {
 
     @Override
     public CompletableFuture<JsonObject> manifest(final RepoName name, final ManifestRef link) {
-        final String path = AstoRepo.REPO_BASE
-            .resolve(name.value())
-            .resolve("_manifests")
-            .resolve(link.path().toASCIIString())
-            .toString();
+        final String path = new Path.From(
+            AstoRepo.REPO_BASE, name.value(), "_manifests", link.path().toASCIIString()
+        ).key();
         return this.asto.value(path)
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(text -> new Digest.FromLink(text))
             .thenApply(digest -> new BlobPath(digest))
-            .thenCompose(blob -> this.asto.value(blob.data().toString()))
+            .thenCompose(blob -> this.asto.value(blob.key()))
             .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
     }
 }
