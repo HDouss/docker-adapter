@@ -24,14 +24,14 @@
 
 package com.artipie.docker.storage;
 
+import com.artipie.asto.Key;
 import com.artipie.docker.Digest;
-import com.artipie.docker.misc.Path;
 
 /**
  * Blob store path.
  * @since 1.0
  */
-final class BlobPath implements Path {
+final class BlobPath implements Key {
 
     /**
      * Layer digest.
@@ -50,13 +50,13 @@ final class BlobPath implements Path {
      * Data key.
      * @return Key for layer data
      */
-    public String key() {
-        return new Path.From(
+    public String string() {
+        return new Key.From(
             "blobs",
             this.digest.alg(),
             this.digest.digest().substring(0, 2),
             this.digest.digest(),
             "data"
-        ).key();
+        ).string();
     }
 }

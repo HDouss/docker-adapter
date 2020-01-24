@@ -39,7 +39,7 @@ public final class BlobPathTest {
         final String hex =
             "00801519ca78ec3ac54f0aea959bce240ab3b42fae7727d2359b1f9ebcabe23d";
         MatcherAssert.assertThat(
-            new BlobPath(new Digest.Sha256(hex)).key().toString(),
+            new BlobPath(new Digest.Sha256(hex)).string(),
             Matchers.equalTo(
                 String.join(
                     "/",
