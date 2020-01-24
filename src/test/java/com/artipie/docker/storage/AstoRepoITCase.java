@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -42,7 +41,6 @@ import org.junit.jupiter.api.Test;
  *  works correctly. But blob path resolution is wrong. It's trying to access
  *  blob from manifest link by wrong path. Fix it and enable the test.
  */
-@Disabled
 public final class AstoRepoITCase {
 
     @Test
