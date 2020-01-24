@@ -41,10 +41,9 @@ import javax.json.JsonObject;
 public final class AstoRepo implements Repo {
 
     /**
-     * Base repos path.
+     * Base repos key.
      */
-    private static final Key REPO_BASE =
-        new Key.From("docker", "registry", "v2", "repositories");
+    private static final Key REPO_BASE = new Key.From("docker", "registry", "v2");
 
     /**
      * Asto storage.
@@ -66,13 +65,15 @@ public final class AstoRepo implements Repo {
 
     @Override
     public CompletableFuture<JsonObject> manifest(final RepoName name, final ManifestRef link) {
-        final Key path = new Key.From(
-            AstoRepo.REPO_BASE, name.value(), "_manifests", link.path().toASCIIString()
+        final Key key = new Key.From(
+            AstoRepo.REPO_BASE, "repositories", name.value(),
+            "_manifests", link.path().toASCIIString()
         );
-        return this.asto.value(path)
+        return this.asto.value(key)
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(text -> new Digest.FromLink(text))
-            .thenCompose(digest -> this.asto.value(new BlobPath(digest)))
+            .thenApply(digest -> new BlobPath(digest))
+            .thenCompose(blob -> this.asto.value(new Key.From(AstoRepo.REPO_BASE, blob.string())))
             .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
     }
 }
