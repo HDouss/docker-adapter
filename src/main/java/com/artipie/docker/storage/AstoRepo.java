@@ -24,13 +24,13 @@
 
 package com.artipie.docker.storage;
 
+import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.manifest.ManifestRef;
 import com.artipie.docker.misc.BytesFlowAs;
-import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import javax.json.JsonObject;
 
@@ -41,12 +41,9 @@ import javax.json.JsonObject;
 public final class AstoRepo implements Repo {
 
     /**
-     * Base repos path.
-     * <p>
-     * It should be decoupled from {@link java.nio.Path} with #18 ticket.
-     * </p>
+     * Base repos key.
      */
-    private static final Path REPO_BASE = Path.of("docker/registry/v2");
+    private static final Key REPO_BASE = new Key.From("docker", "registry", "v2");
 
     /**
      * Asto storage.
@@ -68,20 +65,15 @@ public final class AstoRepo implements Repo {
 
     @Override
     public CompletableFuture<JsonObject> manifest(final RepoName name, final ManifestRef link) {
-        final String path = AstoRepo.REPO_BASE
-            .resolve("repositories")
-            .resolve(name.value())
-            .resolve("_manifests")
-            .resolve(link.path().toASCIIString())
-            .toString();
-        return this.asto.value(path)
+        final Key key = new Key.From(
+            AstoRepo.REPO_BASE, "repositories", name.value(),
+            "_manifests", link.path().toASCIIString()
+        );
+        return this.asto.value(key)
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(text -> new Digest.FromLink(text))
             .thenApply(digest -> new BlobPath(digest))
-            .thenCompose(
-                blob -> this.asto.value(
-                    AstoRepo.REPO_BASE.resolve(blob.data()).toString()
-                )
-            ).thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
+            .thenCompose(blob -> this.asto.value(new Key.From(AstoRepo.REPO_BASE, blob.string())))
+            .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
     }
 }

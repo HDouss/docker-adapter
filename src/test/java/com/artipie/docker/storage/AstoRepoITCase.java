@@ -47,7 +47,7 @@ public final class AstoRepoITCase {
     void readsManifestJson() throws Exception {
         final Path dir = Path.of(
             Thread.currentThread().getContextClassLoader()
-                .getResource("docker").getFile()
+                .getResource("docker").toURI()
         ).getParent();
         final Repo repo = new AstoRepo(new FileStorage(dir));
         final JsonObject json = repo.manifest(
