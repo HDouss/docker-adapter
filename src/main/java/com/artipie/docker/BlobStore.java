@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.asto;
+package com.artipie.docker;
 
-import com.artipie.docker.Digest;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 

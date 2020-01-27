@@ -24,8 +24,6 @@
 
 package com.artipie.docker;
 
-import com.artipie.docker.storage.BlobStore;
-
 /**
  * Docker registry storage main object.
  *

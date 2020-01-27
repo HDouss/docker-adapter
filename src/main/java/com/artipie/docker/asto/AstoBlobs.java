@@ -25,6 +25,7 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.Storage;
+import com.artipie.docker.BlobStore;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ref.BlobRef;
 import java.util.concurrent.CompletableFuture;
