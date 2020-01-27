@@ -28,16 +28,17 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.BlobStore;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ref.BlobRef;
+import com.jcabi.log.Logger;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
 /**
  * Asto {@link BlobStore} implementation.
  * @since 1.0
- * @todo #11:30min Implement put() method.
- *  It should store all data somewhere temporary and calcualte the digest,
- *  then compute blob path from digest and save it by correct blob path
- *  using ASTO storage.
  */
 public final class AstoBlobs implements BlobStore {
 
@@ -57,5 +58,29 @@ public final class AstoBlobs implements BlobStore {
     @Override
     public CompletableFuture<Flow.Publisher<Byte>> blob(final Digest digest) {
         return this.asto.value(new BlobRef(digest));
+    }
+
+    @Override
+    public CompletableFuture<Digest> put(final Flow.Publisher<Byte> blob) {
+        final CompletableFuture<Digest> future = new CompletableFuture<>();
+        try {
+            final FileChannel out = FileChannel.open(
+                Files.createTempFile(this.getClass().getSimpleName(), ".blob.tmp"),
+                StandardOpenOption.WRITE
+            );
+            blob.subscribe(new BlobDigestSub(future, out));
+            future.whenComplete(
+                (dgst, err) -> {
+                    try {
+                        out.close();
+                    } catch (final IOException iox) {
+                        Logger.warn(this, "failed to close blob output: %s", iox);
+                    }
+                }
+            );
+        } catch (final IOException err) {
+            future.completeExceptionally(err);
+        }
+        return future;
     }
 }
