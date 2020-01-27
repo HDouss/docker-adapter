@@ -24,23 +24,37 @@
 
 package com.artipie.docker.asto;
 
+import com.artipie.asto.ByteArray;
 import com.artipie.asto.Storage;
 import com.artipie.docker.BlobStore;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ref.BlobRef;
-import com.jcabi.log.Logger;
+import hu.akarnokd.rxjava3.jdk8interop.SingleInterop;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.internal.operators.flowable.FlowableFromPublisher;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
+import org.reactivestreams.FlowAdapters;
 
 /**
  * Asto {@link BlobStore} implementation.
  * @since 1.0
+ * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class AstoBlobs implements BlobStore {
+
+    /**
+     * Default buffer size for put.
+     */
+    private static final int BUF_SIZE = 8192;
 
     /**
      * Storage.
@@ -61,26 +75,55 @@ public final class AstoBlobs implements BlobStore {
     }
 
     @Override
+    @SuppressWarnings("PMD.OnlyOneReturn")
     public CompletableFuture<Digest> put(final Flow.Publisher<Byte> blob) {
-        final CompletableFuture<Digest> future = new CompletableFuture<>();
+        final MessageDigest digest;
         try {
-            final FileChannel out = FileChannel.open(
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (final NoSuchAlgorithmException err) {
+            throw new IllegalStateException("This runtime doesn't have SHA-256 algorithm", err);
+        }
+        final FileChannel out;
+        try {
+            out = FileChannel.open(
                 Files.createTempFile(this.getClass().getSimpleName(), ".blob.tmp"),
                 StandardOpenOption.WRITE
             );
-            blob.subscribe(new BlobDigestSub(future, out));
-            future.whenComplete(
-                (dgst, err) -> {
-                    try {
-                        out.close();
-                    } catch (final IOException iox) {
-                        Logger.warn(this, "failed to close blob output: %s", iox);
-                    }
-                }
-            );
         } catch (final IOException err) {
-            future.completeExceptionally(err);
+            return CompletableFuture.failedFuture(err);
         }
-        return future;
+        return new FlowableFromPublisher<>(FlowAdapters.toPublisher(blob))
+            .buffer(AstoBlobs.BUF_SIZE)
+            .map(buf -> new ByteArray(buf).primitiveBytes())
+            .flatMapCompletable(
+                buf -> Completable.mergeArray(
+                    Completable.fromAction(() -> digest.update(buf)),
+                    Completable.fromAction(
+                        () -> {
+                            final ByteBuffer wrap = ByteBuffer.wrap(buf);
+                            while (wrap.hasRemaining()) {
+                                out.write(wrap);
+                            }
+                        }
+                    )
+                )
+            ).andThen(Single.fromCallable(() -> toHex(digest.digest())))
+            .map(Digest.Sha256::new)
+            .cast(Digest.class)
+            .doOnTerminate(out::close)
+            .to(SingleInterop.get()).toCompletableFuture();
+    }
+
+    /**
+     * Convert bytes to hex.
+     * @param bytes Bytes
+     * @return Hex string
+     */
+    private static String toHex(final byte[] bytes) {
+        final StringBuilder str = new StringBuilder(bytes.length * 2);
+        for (final byte item : bytes) {
+            str.append(String.format("%02X ", item));
+        }
+        return str.toString();
     }
 }
