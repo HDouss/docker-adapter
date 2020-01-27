@@ -42,5 +42,5 @@ public interface Docker {
      * Docker blob store.
      * @return Blob store for this registry
      */
-    BlobStore blobs();
+    BlobStore blobStore();
 }
