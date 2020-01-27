@@ -22,59 +22,31 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
+package com.artipie.docker.ref;
 
 import com.artipie.docker.Digest;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
 
 /**
- * Manifest link reference.
- * <p>
- * Can be resolved by image tag or digest.
- * </p>
+ * Test case for {@link ManifestRef}.
  * @since 1.0
  */
-public final class ManifestRef implements RefPath {
-
-    /**
-     * Path parts.
-     */
-    private final List<String> parts;
-
-    /**
-     * Manifest link from a digest.
-     * @param digest Digest
-     */
-    public ManifestRef(final Digest digest) {
-        this(
-            Arrays.asList("revisions", digest.alg(), digest.digest(), "link")
+public final class ManifestRefTest {
+    @Test
+    void resolvesDigestLink() {
+        MatcherAssert.assertThat(
+            new ManifestRef(new Digest.Sha256("0000")).string(),
+            Matchers.equalTo("revisions/sha256/0000/link")
         );
     }
 
-    /**
-     * Manifest link from a tag.
-     * @param tag Name
-     */
-    public ManifestRef(final String tag) {
-        this(
-            Arrays.asList("tags", tag, "current/link")
+    @Test
+    void resolvesTagLink() {
+        MatcherAssert.assertThat(
+            new ManifestRef("latest").string(),
+            Matchers.equalTo("tags/latest/current/link")
         );
-    }
-
-    /**
-     * Primary constructor.
-     * @param parts Path parts
-     */
-    private ManifestRef(final List<String> parts) {
-        this.parts = Collections.unmodifiableList(parts);
-    }
-
-    @Override
-    public URI path() {
-        return URI.create(String.join("/", this.parts));
     }
 }
-

@@ -24,19 +24,25 @@
 
 package com.artipie.docker;
 
+import com.artipie.docker.storage.BlobStore;
+
 /**
  * Docker registry storage main object.
  *
  * @since 1.0
  */
-public final class Docker {
+public interface Docker {
 
     /**
      * Docker repo by name.
      * @param name Repository name
      * @return Repository object
      */
-    public Repo repo(final RepoName name) {
-        throw new IllegalArgumentException("not implemented");
-    }
+    Repo repo(RepoName name);
+
+    /**
+     * Docker blob store.
+     * @return Blob store for this registry
+     */
+    BlobStore blobs();
 }

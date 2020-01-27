@@ -22,19 +22,39 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
+package com.artipie.docker.ref;
 
-import java.net.URI;
+import com.artipie.asto.Key;
+import com.artipie.docker.Digest;
 
 /**
- * Registry reference path URI.
+ * Blob reference.
+ * <p>
+ * Can be resolved by blob digest.
  * @since 1.0
  */
-public interface RefPath {
+public final class BlobRef implements Key {
 
     /**
-     * URI path for reference.
-     * @return URI
+     * Blob digest.
      */
-    URI path();
+    private final Digest digest;
+
+    /**
+     * Ctor.
+     * @param digest Blob digest
+     */
+    public BlobRef(final Digest digest) {
+        this.digest = digest;
+    }
+
+    @Override
+    public String string() {
+        return String.format(
+            "blobs/%s/%s/%s",
+            this.digest.alg(),
+            this.digest.digest().substring(0, 2),
+            this.digest.digest()
+        );
+    }
 }

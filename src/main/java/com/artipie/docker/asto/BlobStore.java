@@ -22,38 +22,27 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.storage;
+package com.artipie.docker.asto;
 
-import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
 /**
- * Asto {@link BlobStore} implementation.
+ * Docker registry blob store.
  * @since 1.0
- * @todo #6:30min Wait for new asto lib release
- *  and implement methods for this class using new asto
- *  API with `Flow` support. Don't forget to remove
- *  supprsession for `asto` field and create unit tests.
+ * @todo #6:30min Add put method which should put new layer data
+ *  into blob-store, then compute it's digest using SHA256 and return
+ *  digest as a result. See SPEC.md and docker registry API spec for
+ *  more details.
  */
-public final class AstoBlobs implements BlobStore {
+public interface BlobStore {
 
     /**
-     * Storage.
+     * Load blob by digest.
+     * @param digest Blob digest
+     * @return Async publisher output
      */
-    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private final Storage asto;
-
-    /**
-     * Ctor.
-     * @param asto Storage
-     */
-    public AstoBlobs(final Storage asto) {
-        this.asto = asto;
-    }
-
-    @Override
-    public void load(final Digest digest, final Flow.Subscriber<Byte> out) {
-        out.onComplete();
-    }
+    CompletableFuture<Flow.Publisher<Byte>> blob(Digest digest);
 }
+

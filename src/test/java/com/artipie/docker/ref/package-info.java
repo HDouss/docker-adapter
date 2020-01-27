@@ -21,33 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-package com.artipie.docker.manifest;
-
-import com.artipie.docker.Digest;
-import java.net.URI;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-
 /**
- * Test case for {@link ManifestRef}.
+ * Docker reference links test.
  * @since 1.0
  */
-public final class ManifestRefTest {
-    @Test
-    void resolvesDigestLink() {
-        MatcherAssert.assertThat(
-            new ManifestRef(new Digest.Sha256("0000")).path(),
-            Matchers.equalTo(URI.create("revisions/sha256/0000/link"))
-        );
-    }
-
-    @Test
-    void resolvesTagLink() {
-        MatcherAssert.assertThat(
-            new ManifestRef("latest").path(),
-            Matchers.equalTo(URI.create("tags/latest/current/link"))
-        );
-    }
-}
+package com.artipie.docker.ref;

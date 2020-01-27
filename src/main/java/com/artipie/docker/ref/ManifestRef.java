@@ -22,40 +22,59 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
+package com.artipie.docker.ref;
 
+import com.artipie.asto.Key;
 import com.artipie.docker.Digest;
-import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Blob reference.
+ * Manifest link reference.
  * <p>
- * Can be resolved by blob digest.
+ * Can be resolved by image tag or digest.
+ * </p>
  * @since 1.0
  */
-public final class BlobRef implements RefPath {
+public final class ManifestRef implements Key {
 
     /**
-     * Blob digest.
+     * Path parts.
      */
-    private final Digest digest;
+    private final List<String> parts;
 
     /**
-     * Ctor.
-     * @param digest Blob digest
+     * Manifest link from a digest.
+     * @param digest Digest
      */
-    public BlobRef(final Digest digest) {
-        this.digest = digest;
+    public ManifestRef(final Digest digest) {
+        this(
+            Arrays.asList("revisions", digest.alg(), digest.digest(), "link")
+        );
+    }
+
+    /**
+     * Manifest link from a tag.
+     * @param tag Name
+     */
+    public ManifestRef(final String tag) {
+        this(
+            Arrays.asList("tags", tag, "current/link")
+        );
+    }
+
+    /**
+     * Primary constructor.
+     * @param parts Path parts
+     */
+    private ManifestRef(final List<String> parts) {
+        this.parts = Collections.unmodifiableList(parts);
     }
 
     @Override
-    public URI path() {
-        return URI.create(
-            String.format(
-                "blobs/%s/%s/%s",
-                this.digest.alg(),
-                this.digest.digest().substring(0, 2)
-            )
-        );
+    public String string() {
+        return String.join("/", this.parts);
     }
 }
+

@@ -22,25 +22,8 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.storage;
-
-import com.artipie.docker.Digest;
-import java.util.concurrent.Flow;
-
 /**
- * Docker registry blob store.
+ * Docker reference links.
  * @since 1.0
- * @todo #6:30min Add put method which should put new layer data
- *  into blob-store, then compute it's digest using SHA256 and return
- *  digest as a result. See SPEC.md and docker registry API spec for
- *  more details.
  */
-public interface BlobStore {
-
-    /**
-     * Load blob by digest.
-     * @param digest Blob digest
-     * @param out Async publisher output
-     */
-    void load(Digest digest, Flow.Subscriber<Byte> out);
-}
+package com.artipie.docker.ref;

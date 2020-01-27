@@ -21,9 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-/**
- * Storage and blob-store objects.
- * @since 1.0
- */
-package com.artipie.docker.storage;
 
+package com.artipie.docker.asto;
+
+import com.artipie.asto.Storage;
+import com.artipie.docker.Digest;
+import com.artipie.docker.ref.BlobRef;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
+
+/**
+ * Asto {@link BlobStore} implementation.
+ * @since 1.0
+ * @todo #11:30min Implement put() method.
+ *  It should store all data somewhere temporary and calcualte the digest,
+ *  then compute blob path from digest and save it by correct blob path
+ *  using ASTO storage.
+ */
+public final class AstoBlobs implements BlobStore {
+
+    /**
+     * Storage.
+     */
+    private final Storage asto;
+
+    /**
+     * Ctor.
+     * @param asto Storage
+     */
+    public AstoBlobs(final Storage asto) {
+        this.asto = asto;
+    }
+
+    @Override
+    public CompletableFuture<Flow.Publisher<Byte>> blob(final Digest digest) {
+        return this.asto.value(new BlobRef(digest));
+    }
+}

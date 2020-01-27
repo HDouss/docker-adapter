@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 /**
- * Docker image manifests tests.
+ * Asto implementation of docker registry.
  * @since 1.0
  */
-package com.artipie.docker.manifest;
+package com.artipie.docker.asto;
+
