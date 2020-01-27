@@ -31,30 +31,20 @@ import com.artipie.docker.Digest;
  * Blob reference.
  * <p>
  * Can be resolved by blob digest.
+ * </p>
  * @since 1.0
  */
-public final class BlobRef implements Key {
-
-    /**
-     * Blob digest.
-     */
-    private final Digest digest;
+public final class BlobRef extends Key.Wrap {
 
     /**
      * Ctor.
      * @param digest Blob digest
      */
     public BlobRef(final Digest digest) {
-        this.digest = digest;
-    }
-
-    @Override
-    public String string() {
-        return String.format(
-            "blobs/%s/%s/%s",
-            this.digest.alg(),
-            this.digest.digest().substring(0, 2),
-            this.digest.digest()
+        super(
+            new Key.From(
+                "blobs", digest.alg(), digest.digest().substring(0, 2), digest.digest()
+            )
         );
     }
 }
