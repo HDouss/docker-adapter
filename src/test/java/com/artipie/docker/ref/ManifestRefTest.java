@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
+package com.artipie.docker.ref;
 
 import com.artipie.docker.Digest;
-import java.net.URI;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -38,16 +37,16 @@ public final class ManifestRefTest {
     @Test
     void resolvesDigestLink() {
         MatcherAssert.assertThat(
-            new ManifestRef(new Digest.Sha256("0000")).path(),
-            Matchers.equalTo(URI.create("revisions/sha256/0000/link"))
+            new ManifestRef(new Digest.Sha256("0000")).string(),
+            Matchers.equalTo("revisions/sha256/0000/link")
         );
     }
 
     @Test
     void resolvesTagLink() {
         MatcherAssert.assertThat(
-            new ManifestRef("latest").path(),
-            Matchers.equalTo(URI.create("tags/latest/current/link"))
+            new ManifestRef("latest").string(),
+            Matchers.equalTo("tags/latest/current/link")
         );
     }
 }

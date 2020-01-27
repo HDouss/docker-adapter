@@ -22,59 +22,40 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
+package com.artipie.docker.asto;
 
+import com.artipie.asto.Storage;
+import com.artipie.docker.BlobStore;
 import com.artipie.docker.Digest;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.artipie.docker.ref.BlobRef;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 
 /**
- * Manifest link reference.
- * <p>
- * Can be resolved by image tag or digest.
- * </p>
+ * Asto {@link BlobStore} implementation.
  * @since 1.0
+ * @todo #11:30min Implement put() method.
+ *  It should store all data somewhere temporary and calcualte the digest,
+ *  then compute blob path from digest and save it by correct blob path
+ *  using ASTO storage.
  */
-public final class ManifestRef implements RefPath {
+public final class AstoBlobs implements BlobStore {
 
     /**
-     * Path parts.
+     * Storage.
      */
-    private final List<String> parts;
+    private final Storage asto;
 
     /**
-     * Manifest link from a digest.
-     * @param digest Digest
+     * Ctor.
+     * @param asto Storage
      */
-    public ManifestRef(final Digest digest) {
-        this(
-            Arrays.asList("revisions", digest.alg(), digest.digest(), "link")
-        );
-    }
-
-    /**
-     * Manifest link from a tag.
-     * @param tag Name
-     */
-    public ManifestRef(final String tag) {
-        this(
-            Arrays.asList("tags", tag, "current/link")
-        );
-    }
-
-    /**
-     * Primary constructor.
-     * @param parts Path parts
-     */
-    private ManifestRef(final List<String> parts) {
-        this.parts = Collections.unmodifiableList(parts);
+    public AstoBlobs(final Storage asto) {
+        this.asto = asto;
     }
 
     @Override
-    public URI path() {
-        return URI.create(String.join("/", this.parts));
+    public CompletableFuture<Flow.Publisher<Byte>> blob(final Digest digest) {
+        return this.asto.value(new BlobRef(digest));
     }
 }
-

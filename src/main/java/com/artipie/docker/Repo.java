@@ -24,7 +24,7 @@
 
 package com.artipie.docker;
 
-import com.artipie.docker.manifest.ManifestRef;
+import com.artipie.docker.ref.ManifestRef;
 import java.util.concurrent.CompletableFuture;
 import javax.json.JsonObject;
 

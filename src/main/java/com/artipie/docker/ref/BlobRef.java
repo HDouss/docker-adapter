@@ -21,8 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+package com.artipie.docker.ref;
+
+import com.artipie.asto.Key;
+import com.artipie.docker.Digest;
+
 /**
- * Docker image manifests tests.
+ * Blob reference.
+ * <p>
+ * Can be resolved by blob digest.
+ * </p>
  * @since 1.0
  */
-package com.artipie.docker.manifest;
+public final class BlobRef extends Key.Wrap {
+
+    /**
+     * Ctor.
+     * @param digest Blob digest
+     */
+    public BlobRef(final Digest digest) {
+        super(
+            new Key.From(
+                "blobs", digest.alg(), digest.digest().substring(0, 2), digest.digest()
+            )
+        );
+    }
+}

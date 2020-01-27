@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 /**
- * Storage and blob-store objects.
+ * Asto implementation of docker registry.
  * @since 1.0
  */
-package com.artipie.docker.storage;
+package com.artipie.docker.asto;
 

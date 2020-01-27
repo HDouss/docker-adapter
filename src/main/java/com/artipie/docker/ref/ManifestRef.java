@@ -22,19 +22,59 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
+package com.artipie.docker.ref;
 
-import java.net.URI;
+import com.artipie.asto.Key;
+import com.artipie.docker.Digest;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Registry reference path URI.
+ * Manifest link reference.
+ * <p>
+ * Can be resolved by image tag or digest.
+ * </p>
  * @since 1.0
  */
-public interface RefPath {
+public final class ManifestRef implements Key {
 
     /**
-     * URI path for reference.
-     * @return URI
+     * Path parts.
      */
-    URI path();
+    private final List<String> parts;
+
+    /**
+     * Manifest link from a digest.
+     * @param digest Digest
+     */
+    public ManifestRef(final Digest digest) {
+        this(
+            Arrays.asList("revisions", digest.alg(), digest.digest(), "link")
+        );
+    }
+
+    /**
+     * Manifest link from a tag.
+     * @param tag Name
+     */
+    public ManifestRef(final String tag) {
+        this(
+            Arrays.asList("tags", tag, "current/link")
+        );
+    }
+
+    /**
+     * Primary constructor.
+     * @param parts Path parts
+     */
+    private ManifestRef(final List<String> parts) {
+        this.parts = Collections.unmodifiableList(parts);
+    }
+
+    @Override
+    public String string() {
+        return String.join("/", this.parts);
+    }
 }
+

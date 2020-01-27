@@ -22,40 +22,8 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.manifest;
-
-import com.artipie.docker.Digest;
-import java.net.URI;
-
 /**
- * Blob reference.
- * <p>
- * Can be resolved by blob digest.
+ * Docker reference links.
  * @since 1.0
  */
-public final class BlobRef implements RefPath {
-
-    /**
-     * Blob digest.
-     */
-    private final Digest digest;
-
-    /**
-     * Ctor.
-     * @param digest Blob digest
-     */
-    public BlobRef(final Digest digest) {
-        this.digest = digest;
-    }
-
-    @Override
-    public URI path() {
-        return URI.create(
-            String.format(
-                "blobs/%s/%s/%s",
-                this.digest.alg(),
-                this.digest.digest().substring(0, 2)
-            )
-        );
-    }
-}
+package com.artipie.docker.ref;

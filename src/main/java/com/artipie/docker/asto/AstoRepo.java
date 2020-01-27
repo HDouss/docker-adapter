@@ -22,15 +22,16 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.storage;
+package com.artipie.docker.asto;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.manifest.ManifestRef;
 import com.artipie.docker.misc.BytesFlowAs;
+import com.artipie.docker.ref.BlobRef;
+import com.artipie.docker.ref.ManifestRef;
 import java.util.concurrent.CompletableFuture;
 import javax.json.JsonObject;
 
@@ -67,12 +68,12 @@ public final class AstoRepo implements Repo {
     public CompletableFuture<JsonObject> manifest(final RepoName name, final ManifestRef link) {
         final Key key = new Key.From(
             AstoRepo.REPO_BASE, "repositories", name.value(),
-            "_manifests", link.path().toASCIIString()
+            "_manifests", link.string()
         );
         return this.asto.value(key)
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(text -> new Digest.FromLink(text))
-            .thenApply(digest -> new BlobPath(digest))
+            .thenApply(digest -> new Key.From(new BlobRef(digest), "data"))
             .thenCompose(blob -> this.asto.value(new Key.From(AstoRepo.REPO_BASE, blob.string())))
             .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
     }

@@ -21,42 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.artipie.docker.ref;
 
-package com.artipie.docker.storage;
-
-import com.artipie.asto.Key;
 import com.artipie.docker.Digest;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
 
 /**
- * Blob store path.
+ * Test case for {@link BlobRefTest}.
  * @since 1.0
  */
-final class BlobPath implements Key {
+public final class BlobRefTest {
 
-    /**
-     * Layer digest.
-     */
-    private final Digest digest;
-
-    /**
-     * Ctor.
-     * @param digest Layer digest
-     */
-    BlobPath(final Digest digest) {
-        this.digest = digest;
-    }
-
-    /**
-     * Data key.
-     * @return Key for layer data
-     */
-    public String string() {
-        return new Key.From(
-            "blobs",
-            this.digest.alg(),
-            this.digest.digest().substring(0, 2),
-            this.digest.digest(),
-            "data"
-        ).string();
+    @Test
+    public void buildsValidPathFromDigest() throws Exception {
+        final String hex =
+            "00801519ca78ec3ac54f0aea959bce240ab3b42fae7727d2359b1f9ebcabe23d";
+        MatcherAssert.assertThat(
+            new BlobRef(new Digest.Sha256(hex)).string(),
+            Matchers.equalTo(
+                String.join(
+                    "/",
+                    "blobs", "sha256", "00", hex
+                )
+            )
+        );
     }
 }
