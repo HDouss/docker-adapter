@@ -25,18 +25,21 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.ByteArray;
+import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.docker.BlobStore;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ref.BlobRef;
 import hu.akarnokd.rxjava3.jdk8interop.SingleInterop;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.internal.operators.flowable.FlowableFromPublisher;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -49,10 +52,13 @@ import org.reactivestreams.FlowAdapters;
 /**
  * Asto {@link BlobStore} implementation.
  * @since 1.0
- * @todo #36:30min Continue implementing put operation.
- *  Now it saves incoming blob into temporary file to caclulate it's digest,
- *  but it should be stored at correct blob path which can be calculated from
- *  digest (see README and SPEC files).
+ * @todo #41:30min Implement integration test for this class.
+ *  It should verify that blob data can be stored via ASTO storage
+ *  at correct path (see README and SPEC),
+ *  and calculate the digest correctly.
+ * @todo #41:30min Refactor this class, make it more readable.
+ *  Put method is overcomplicated right now, try to decompose it,
+ *  move some logic into new classes or methods.
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class AstoBlobs implements BlobStore {
@@ -83,18 +89,17 @@ public final class AstoBlobs implements BlobStore {
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public CompletableFuture<Digest> put(final Flow.Publisher<Byte> blob) {
-        final MessageDigest digest;
+        final MessageDigest sha;
         try {
-            digest = MessageDigest.getInstance("SHA-256");
+            sha = MessageDigest.getInstance("SHA-256");
         } catch (final NoSuchAlgorithmException err) {
             throw new IllegalStateException("This runtime doesn't have SHA-256 algorithm", err);
         }
+        final Path tmp;
         final FileChannel out;
         try {
-            out = FileChannel.open(
-                Files.createTempFile(this.getClass().getSimpleName(), ".blob.tmp"),
-                StandardOpenOption.WRITE
-            );
+            tmp = Files.createTempFile(this.getClass().getSimpleName(), ".blob.tmp");
+            out = FileChannel.open(tmp, StandardOpenOption.WRITE);
         } catch (final IOException err) {
             return CompletableFuture.failedFuture(err);
         }
@@ -103,7 +108,7 @@ public final class AstoBlobs implements BlobStore {
             .map(buf -> new ByteArray(buf).primitiveBytes())
             .flatMapCompletable(
                 buf -> Completable.mergeArray(
-                    Completable.fromAction(() -> digest.update(buf)),
+                    Completable.fromAction(() -> sha.update(buf)),
                     Completable.fromAction(
                         () -> {
                             final ByteBuffer wrap = ByteBuffer.wrap(buf);
@@ -113,10 +118,20 @@ public final class AstoBlobs implements BlobStore {
                         }
                     )
                 )
-            ).andThen(Single.fromCallable(() -> new HexOf(new BytesOf(digest.digest())).asString()))
+            ).andThen(Single.fromCallable(() -> new HexOf(new BytesOf(sha.digest())).asString()))
             .map(Digest.Sha256::new)
             .cast(Digest.class)
             .doOnTerminate(out::close)
+            .flatMap(
+                digest -> SingleInterop.fromFuture(
+                    this.asto.save(
+                        new Key.From(RegistryRoot.V2, new BlobRef(digest).string(), "data"),
+                        FlowAdapters.toFlowPublisher(
+                            Flowable.fromArray(new ByteArray(Files.readAllBytes(tmp)).boxedBytes())
+                        )
+                    ).thenApply(none -> digest)
+                )
+            ).doOnTerminate(() -> Files.delete(tmp))
             .to(SingleInterop.get()).toCompletableFuture();
     }
 }
