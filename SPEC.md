@@ -1,26 +1,4 @@
-The path layout in the storage backend is roughly as follows:
-
-```
-<root>/v2
-	-> repositories/
-		-> <name>/
-			-> _manifests/
-				revisions
-				-> <manifest digest path>
-					-> link
-				tags/<tag>
-				-> current/link
-					-> index
-					-> <algorithm>/<hex digest>/link
-			-> _layers/
-				<layer links to blob store>
-			-> _uploads/<id>
-				data
-				startedat
-				hashstates/<algorithm>/<offset>
-	-> blob/<algorithm>
-		<split directory content addressable storage>
-```
+# Docker registry file structure
 
 The storage backend layout is broken up into a content-addressable blob
 store and repositories. The content-addressable blob store holds most data
