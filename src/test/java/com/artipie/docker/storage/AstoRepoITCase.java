@@ -38,9 +38,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Integration tests for {@link AstoRepo}.
  * @since 1.0
- * @todo #29:30min This test is failing. Manifest resolution was fixed and it
- *  works correctly. But blob path resolution is wrong. It's trying to access
- *  blob from manifest link by wrong path. Fix it and enable the test.
  */
 public final class AstoRepoITCase {
 
