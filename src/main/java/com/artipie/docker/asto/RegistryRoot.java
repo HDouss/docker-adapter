@@ -27,7 +27,7 @@ import com.artipie.asto.Key;
 
 /**
  * Docker registry root key.
- * @since 1.0
+ * @since 0.1
  */
 public final class RegistryRoot extends Key.Wrap {
 

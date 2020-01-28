@@ -23,6 +23,6 @@
  */
 /**
  * Docker reference links test.
- * @since 1.0
+ * @since 0.1
  */
 package com.artipie.docker.ref;

@@ -23,7 +23,7 @@
  */
 /**
  * Asto implementation of docker registry.
- * @since 1.0
+ * @since 0.1
  */
 package com.artipie.docker.asto;
 

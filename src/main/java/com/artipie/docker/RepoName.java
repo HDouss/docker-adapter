@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 /**
  * Docker repository name.
- * @since 1.0
+ * @since 0.1
  */
 public interface RepoName {
 
@@ -58,7 +58,7 @@ public interface RepoName {
      * must be less than 256 characters</li>
      * </ul>
      * </p>
-     * @since 1.0
+     * @since 0.1
      */
     final class Valid implements RepoName {
 
@@ -129,7 +129,7 @@ public interface RepoName {
 
     /**
      * Simple repo name. Can be used for tests as fake object.
-     * @since 1.0
+     * @since 0.1
      */
     final class Simple implements RepoName {
 

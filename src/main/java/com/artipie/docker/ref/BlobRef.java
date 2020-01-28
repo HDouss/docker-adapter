@@ -32,7 +32,7 @@ import com.artipie.docker.Digest;
  * <p>
  * Can be resolved by blob digest.
  * </p>
- * @since 1.0
+ * @since 0.1
  */
 public final class BlobRef extends Key.Wrap {
 

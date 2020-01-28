@@ -51,7 +51,7 @@ import org.reactivestreams.FlowAdapters;
 
 /**
  * Asto {@link BlobStore} implementation.
- * @since 1.0
+ * @since 0.1
  * @todo #41:30min Implement integration test for this class.
  *  It should verify that blob data can be stored via ASTO storage
  *  at correct path (see README and SPEC),

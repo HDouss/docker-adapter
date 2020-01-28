@@ -29,7 +29,7 @@ import java.util.concurrent.Flow;
 
 /**
  * Docker registry blob store.
- * @since 1.0
+ * @since 0.1
  * @todo #6:30min Add put method which should put new layer data
  *  into blob-store, then compute it's digest using SHA256 and return
  *  digest as a result. See SPEC.md and docker registry API spec for

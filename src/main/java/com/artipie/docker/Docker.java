@@ -27,7 +27,7 @@ package com.artipie.docker;
 /**
  * Docker registry storage main object.
  *
- * @since 1.0
+ * @since 0.1
  */
 public interface Docker {
 

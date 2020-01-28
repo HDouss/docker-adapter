@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for {@link AstoRepo}.
- * @since 1.0
+ * @since 0.1
  */
 public final class AstoRepoITCase {
 

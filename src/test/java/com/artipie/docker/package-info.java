@@ -23,6 +23,6 @@
  */
 /**
  * Docker-registry Artipie adapter tests.
- * @since 1.0
+ * @since 0.1
  */
 package com.artipie.docker;

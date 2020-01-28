@@ -30,7 +30,7 @@ import javax.json.JsonObject;
 
 /**
  * Docker repository files and metadata.
- * @since 1.0
+ * @since 0.1
  */
 public interface Repo {
 

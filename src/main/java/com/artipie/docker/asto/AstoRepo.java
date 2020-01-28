@@ -37,7 +37,7 @@ import javax.json.JsonObject;
 
 /**
  * Asto implementation of {@link Repo}.
- * @since 1.0
+ * @since 0.1
  */
 public final class AstoRepo implements Repo {
 

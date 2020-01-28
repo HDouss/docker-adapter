@@ -35,7 +35,7 @@ import java.util.List;
  * <p>
  * Can be resolved by image tag or digest.
  * </p>
- * @since 1.0
+ * @since 0.1
  */
 public final class ManifestRef implements Key {
 

@@ -36,7 +36,7 @@ import org.reactivestreams.FlowAdapters;
 /**
  * Test case for {@link BytesFlowAs}.
  *
- * @since 1.0
+ * @since 0.1
  */
 final class BytesFlowAsTest {
 

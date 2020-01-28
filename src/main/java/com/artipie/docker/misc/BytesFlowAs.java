@@ -39,7 +39,7 @@ import javax.json.Json;
 /**
  * This class represents {@link Flow.Subscriber} as converted value.
  * @param <T> Representing type
- * @since 1.0
+ * @since 0.1
  */
 public abstract class BytesFlowAs<T> {
     /**
@@ -76,7 +76,7 @@ public abstract class BytesFlowAs<T> {
     /**
      * Subscriber for bytes flow.
      * @param <T> Target type
-     * @since 1.0
+     * @since 0.1
      */
     private static final class FutureSubscriber<T> implements Flow.Subscriber<Byte> {
 
@@ -161,7 +161,7 @@ public abstract class BytesFlowAs<T> {
 
     /**
      * Bytes flow as Json object.
-     * @since 1.0
+     * @since 0.1
      */
     public static final class JsonObject extends BytesFlowAs<javax.json.JsonObject> {
         /**
@@ -178,7 +178,7 @@ public abstract class BytesFlowAs<T> {
 
     /**
      * Bytes as text.
-     * @since 1.0
+     * @since 0.1
      */
     public static final class Text extends BytesFlowAs<String> {
 

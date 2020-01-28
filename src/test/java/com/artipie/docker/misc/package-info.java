@@ -24,7 +24,7 @@
 
 /**
  * Tests for misc objects.
- * @since 1.0
+ * @since 0.1
  */
 package com.artipie.docker.misc;
 

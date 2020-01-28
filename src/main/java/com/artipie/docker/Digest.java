@@ -26,7 +26,7 @@ package com.artipie.docker;
 
 /**
  * Digest for image layer.
- * @since 1.0
+ * @since 0.1
  */
 public interface Digest {
 
@@ -44,7 +44,7 @@ public interface Digest {
 
     /**
      * SHA256 digest implementation.
-     * @since 1.0
+     * @since 0.1
      */
     final class Sha256 implements Digest {
 
@@ -79,7 +79,7 @@ public interface Digest {
      * by joining algorithm name with hex string using {@code :} as separator.
      * E.g. if algorihm is {@code sha256} and the digest is {@code 0000}, the link will be
      * {@code sha256:0000}.
-     * @since 1.0
+     * @since 0.1
      */
     final class FromLink implements Digest {
 

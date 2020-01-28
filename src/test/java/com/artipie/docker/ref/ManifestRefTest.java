@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link ManifestRef}.
- * @since 1.0
+ * @since 0.1
  */
 public final class ManifestRefTest {
     @Test

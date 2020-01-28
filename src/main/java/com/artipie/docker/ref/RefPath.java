@@ -28,7 +28,7 @@ import java.net.URI;
 
 /**
  * Registry reference path URI.
- * @since 1.0
+ * @since 0.1
  */
 public interface RefPath {
 
