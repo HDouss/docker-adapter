@@ -25,9 +25,9 @@ package com.artipie.docker.misc;
 
 import com.artipie.asto.ByteArray;
 import io.reactivex.rxjava3.core.Flowable;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import javax.json.Json;
+import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -43,13 +43,14 @@ final class BytesFlowAsTest {
     @Test
     void parsesText() throws Exception {
         final String txt = "hello";
-        final Charset charset = StandardCharsets.UTF_8;
         MatcherAssert.assertThat(
             new BytesFlowAs.Text(
                 FlowAdapters.toFlowPublisher(
-                    Flowable.fromArray(new ByteArray(txt.getBytes(charset)).boxedBytes())
+                    Flowable.fromArray(
+                        new ByteArray(txt.getBytes(StandardCharsets.UTF_8)).boxedBytes()
+                    )
                 ),
-                charset
+                StandardCharsets.UTF_8
             ).future().get(),
             Matchers.equalTo(txt)
         );
@@ -57,21 +58,19 @@ final class BytesFlowAsTest {
 
     @Test
     void parsesJson() throws Exception {
+        final JsonObject json = Json.createObjectBuilder()
+            .add("one", 1)
+            .build();
         MatcherAssert.assertThat(
             new BytesFlowAs.JsonObject(
                 FlowAdapters.toFlowPublisher(
                     Flowable.fromArray(
-                        new ByteArray(
-                            "{\"one\":1}".getBytes(StandardCharsets.UTF_8)
-                        ).boxedBytes()
+                        new ByteArray(json.toString().getBytes(StandardCharsets.UTF_8))
+                            .boxedBytes()
                     )
                 )
             ).future().get(),
-            Matchers.equalTo(
-                Json.createObjectBuilder()
-                    .add("one", 1)
-                    .build()
-            )
+            Matchers.equalTo(json)
         );
     }
 }
