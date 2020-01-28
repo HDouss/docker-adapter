@@ -99,11 +99,13 @@ public interface RepoName {
         public String value() {
             final String src = this.origin.value();
             final int len = src.length();
-            if (len >= RepoName.Valid.MAX_NAME_LEN) {
-                throw new IllegalStateException("repo name must be less than 256 chars");
-            }
-            if (len == 0) {
-                throw new IllegalStateException("repo name is empty");
+            if (len < 1 || len >= RepoName.Valid.MAX_NAME_LEN) {
+                throw new IllegalStateException(
+                    String.format(
+                        "repo name must be between 1 and %d chars long",
+                        RepoName.Valid.MAX_NAME_LEN
+                    )
+                );
             }
             if (src.charAt(len - 1) == '/') {
                 throw new IllegalStateException(

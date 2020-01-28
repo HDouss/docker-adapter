@@ -43,12 +43,12 @@ final class RepoNameTest {
     }
 
     @Test
-    void cantBeEmpty() {
+    void cannotBeEmpty() {
         Assertions.assertThrows(IllegalStateException.class, () -> new RepoName.Valid("").value());
     }
 
     @Test
-    void cantBeHuge() {
+    void cannotBeGreaterThanMaxLength() {
         Assertions.assertThrows(
             IllegalStateException.class,
             // @checkstyle MagicNumberCheck (1 line)
@@ -57,7 +57,7 @@ final class RepoNameTest {
     }
 
     @Test
-    void cantEndWithSlash() {
+    void cannotEndWithSlash() {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new RepoName.Valid("asd/").value()
@@ -65,7 +65,7 @@ final class RepoNameTest {
     }
 
     @Test
-    void cantIncludeStrangeSymbols() {
+    void cannotIncludeStrangeSymbols() {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new RepoName.Valid("asd+zxc").value()
