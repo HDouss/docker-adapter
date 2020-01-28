@@ -42,19 +42,25 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
+import org.cactoos.io.BytesOf;
+import org.cactoos.text.HexOf;
 import org.reactivestreams.FlowAdapters;
 
 /**
  * Asto {@link BlobStore} implementation.
  * @since 1.0
+ * @todo #36:30min Continue implementing put operation.
+ *  Now it saves incoming blob into temporary file to caclulate it's digest,
+ *  but it should be stored at correct blob path which can be calculated from
+ *  digest (see README and SPEC files).
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class AstoBlobs implements BlobStore {
 
     /**
-     * Default buffer size for put.
+     * Default buffer size for put publisher.
      */
-    private static final int BUF_SIZE = 8192;
+    private static final int PUB_BUF_SIZE = 8192;
 
     /**
      * Storage.
@@ -93,7 +99,7 @@ public final class AstoBlobs implements BlobStore {
             return CompletableFuture.failedFuture(err);
         }
         return new FlowableFromPublisher<>(FlowAdapters.toPublisher(blob))
-            .buffer(AstoBlobs.BUF_SIZE)
+            .buffer(AstoBlobs.PUB_BUF_SIZE)
             .map(buf -> new ByteArray(buf).primitiveBytes())
             .flatMapCompletable(
                 buf -> Completable.mergeArray(
@@ -107,23 +113,10 @@ public final class AstoBlobs implements BlobStore {
                         }
                     )
                 )
-            ).andThen(Single.fromCallable(() -> toHex(digest.digest())))
+            ).andThen(Single.fromCallable(() -> new HexOf(new BytesOf(digest.digest())).asString()))
             .map(Digest.Sha256::new)
             .cast(Digest.class)
             .doOnTerminate(out::close)
             .to(SingleInterop.get()).toCompletableFuture();
-    }
-
-    /**
-     * Convert bytes to hex.
-     * @param bytes Bytes
-     * @return Hex string
-     */
-    private static String toHex(final byte[] bytes) {
-        final StringBuilder str = new StringBuilder(bytes.length * 2);
-        for (final byte item : bytes) {
-            str.append(String.format("%02X ", item));
-        }
-        return str.toString();
     }
 }
