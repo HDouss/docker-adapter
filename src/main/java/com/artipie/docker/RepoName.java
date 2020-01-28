@@ -59,9 +59,6 @@ public interface RepoName {
      * </ul>
      * </p>
      * @since 1.0
-     * @todo #13:30min Wait for PR with junit5 to be merged and implement
-     *  unit tests for this class. It should include checks agains repo name length,
-     *  lading or trailing slashes, invalid path parts and empty name.
      */
     final class Valid implements RepoName {
 
@@ -69,7 +66,7 @@ public interface RepoName {
          * Repository name part pattern.
          */
         private static final Pattern PART_PTN =
-            Pattern.compile("[a-z0-9]+(?:[._-][a-z0-9]+)*}");
+            Pattern.compile("[a-z0-9]+(?:[._-][a-z0-9]+)*");
 
         /**
          * Repository name max length.
@@ -102,8 +99,13 @@ public interface RepoName {
         public String value() {
             final String src = this.origin.value();
             final int len = src.length();
-            if (len >= RepoName.Valid.MAX_NAME_LEN) {
-                throw new IllegalStateException("repo name must be less than 256 chars");
+            if (len < 1 || len >= RepoName.Valid.MAX_NAME_LEN) {
+                throw new IllegalStateException(
+                    String.format(
+                        "repo name must be between 1 and %d chars long",
+                        RepoName.Valid.MAX_NAME_LEN
+                    )
+                );
             }
             if (src.charAt(len - 1) == '/') {
                 throw new IllegalStateException(
