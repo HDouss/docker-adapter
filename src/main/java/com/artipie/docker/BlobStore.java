@@ -43,5 +43,12 @@ public interface BlobStore {
      * @return Async publisher output
      */
     CompletableFuture<Flow.Publisher<Byte>> blob(Digest digest);
+
+    /**
+     * Put data into blob store and calculate its digest.
+     * @param blob Data flow
+     * @return Future with digest
+     */
+    CompletableFuture<Digest> put(Flow.Publisher<Byte> blob);
 }
 
