@@ -22,19 +22,40 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.ref;
+package com.artipie.docker.asto;
 
-import java.net.URI;
+import com.artipie.asto.Storage;
+import com.artipie.docker.BlobStore;
+import com.artipie.docker.Docker;
+import com.artipie.docker.Repo;
+import com.artipie.docker.RepoName;
 
 /**
- * Registry reference path URI.
+ * Asto {@link Docker} implementation.
  * @since 0.1
  */
-public interface RefPath {
+public final class AstoDocker implements Docker {
 
     /**
-     * URI path for reference.
-     * @return URI
+     * Asto storage.
      */
-    URI path();
+    private final Storage asto;
+
+    /**
+     * Ctor.
+     * @param asto Asto storage
+     */
+    public AstoDocker(final Storage asto) {
+        this.asto = asto;
+    }
+
+    @Override
+    public Repo repo(final RepoName name) {
+        return new AstoRepo(this.asto, name);
+    }
+
+    @Override
+    public BlobStore blobStore() {
+        return new AstoBlobs(this.asto);
+    }
 }

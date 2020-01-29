@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
  * @since 0.1
  */
 public final class DigestTest {
-
     @Test
     void parsesValidLink() {
         final Digest dgst = new Digest.FromLink("sha256:1234");

@@ -40,17 +40,14 @@ import org.junit.jupiter.api.Test;
  * @since 0.1
  */
 public final class AstoRepoITCase {
-
     @Test
     void readsManifestJson() throws Exception {
         final Path dir = Path.of(
             Thread.currentThread().getContextClassLoader()
                 .getResource("docker").toURI()
         ).getParent();
-        final Repo repo = new AstoRepo(new FileStorage(dir));
-        final JsonObject json = repo.manifest(
-            new RepoName.Simple("test"), new ManifestRef("1")
-        ).get();
+        final Repo repo = new AstoRepo(new FileStorage(dir), new RepoName.Simple("test"));
+        final JsonObject json = repo.manifest(new ManifestRef("1")).get();
         MatcherAssert.assertThat(
             json.getJsonObject("config").getString("digest"),
             Matchers.is("sha256:e56378c5af5160fd8b7d8ad97a9c0aeef08ed31abcc431048c876602e1bdac4d")

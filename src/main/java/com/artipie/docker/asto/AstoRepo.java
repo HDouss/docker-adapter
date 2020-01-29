@@ -47,11 +47,18 @@ public final class AstoRepo implements Repo {
     private final Storage asto;
 
     /**
+     * Repository name.
+     */
+    private final RepoName name;
+
+    /**
      * Ctor.
      * @param asto Asto storage
+     * @param name Repository name
      */
-    public AstoRepo(final Storage asto) {
+    public AstoRepo(final Storage asto, final RepoName name) {
         this.asto = asto;
+        this.name = name;
     }
 
     @Override
@@ -60,9 +67,9 @@ public final class AstoRepo implements Repo {
     }
 
     @Override
-    public CompletableFuture<JsonObject> manifest(final RepoName name, final ManifestRef link) {
+    public CompletableFuture<JsonObject> manifest(final ManifestRef link) {
         final Key key = new Key.From(
-            RegistryRoot.V2, "repositories", name.value(),
+            RegistryRoot.V2, "repositories", this.name.value(),
             "_manifests", link.string()
         );
         return this.asto.value(key)

@@ -44,7 +44,6 @@ import org.reactivestreams.FlowAdapters;
  *  failed to write a file on IOException.
  */
 final class AstoBlobsITCase {
-
     @Test
     void saveBlobDataAtCorrectPath(@TempDir final Path tmp) throws Exception {
         final ByteArray blob = new ByteArray(new byte[]{0x00, 0x01, 0x02, 0x03});
