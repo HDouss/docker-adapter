@@ -33,36 +33,40 @@ import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.reactivestreams.FlowAdapters;
 
 /**
- * Test case for {@link AstoBlobs}.
+ * Integration test for {@link AstoBlobs}.
  * @since 0.1
+ * @todo #43:30min Implement more integration tests for AstoBlobs,
+ *  we should check negative cases when put() method fails, e.g. if
+ *  failed to write a file on IOException.
  */
 final class AstoBlobsITCase {
+
     @Test
-    void saveBlobDataAtCorrectPath() throws Exception {
-        final Path tmp = Files.createTempDirectory(this.getClass().getSimpleName());
-        final ByteArray target = new ByteArray(new byte[]{0x00, 0x01, 0x02, 0x03});
+    void saveBlobDataAtCorrectPath(@TempDir final Path tmp) throws Exception {
+        final ByteArray blob = new ByteArray(new byte[]{0x00, 0x01, 0x02, 0x03});
         final Digest digest = new AstoBlobs(new FileStorage(tmp)).put(
-            FlowAdapters.toFlowPublisher(Flowable.fromArray(target.boxedBytes()))
+            FlowAdapters.toFlowPublisher(Flowable.fromArray(blob.boxedBytes()))
         ).get();
         MatcherAssert.assertThat(
-            "digest alg is not correct",
+            "Digest alg is not correct",
             digest.alg(), Matchers.equalTo("sha256")
         );
         final String hash = "054edec1d0211f624fed0cbca9d4f9400b0e491c43742af2c5b0abebf0c990d8";
         MatcherAssert.assertThat(
-            "digest sum is not correct",
+            "Digest sum is not correct",
             digest.digest(),
             Matchers.equalTo(hash)
         );
         MatcherAssert.assertThat(
-            "file content is not correct",
-                Files.readAllBytes(
-                    tmp.resolve("docker/registry/v2/blobs/sha256/05").resolve(hash).resolve("data")
+            "File content is not correct",
+            Files.readAllBytes(
+                tmp.resolve("docker/registry/v2/blobs/sha256/05").resolve(hash).resolve("data")
             ),
-            Matchers.equalTo(target.primitiveBytes())
+            Matchers.equalTo(blob.primitiveBytes())
         );
     }
 }
