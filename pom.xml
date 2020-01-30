@@ -13,6 +13,33 @@
     <maven.compiler.target>11</maven.compiler.target>
     <junit-platform.version>5.4.2</junit-platform.version>
   </properties>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://github.com/artipie/docker-adapter/blob/master/LICENSE</url>
+    </license>
+  </licenses>
+  <distributionManagement>
+    <repository>
+      <id>oss.sonatype.org</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+    <snapshotRepository>
+      <id>oss.sonatype.org</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+  <developers>
+    <developer>
+      <name>Kirill Che.</name>
+      <email>g4s8.public@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/artipie/docker-adapter.git</connection>
+    <developerConnection>scm:git:ssh://github.com:artipie/docker-adapter.git</developerConnection>
+    <url>https://github.com/artipie/docker-adapter/tree/master</url>
+  </scm>
   <dependencies>
     <dependency>
       <groupId>javax.json</groupId>
