@@ -22,25 +22,9 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker;
-
 /**
- * Docker registry storage main object.
- * @see com.artipie.docker.asto.AstoDocker
+ * Tests for ASTO implementations.
  * @since 0.1
  */
-public interface Docker {
+package com.artipie.docker.asto;
 
-    /**
-     * Docker repo by name.
-     * @param name Repository name
-     * @return Repository object
-     */
-    Repo repo(RepoName name);
-
-    /**
-     * Docker blob store.
-     * @return Blob store for this registry
-     */
-    BlobStore blobStore();
-}

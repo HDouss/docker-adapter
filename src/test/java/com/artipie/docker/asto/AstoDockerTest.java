@@ -22,19 +22,33 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.ref;
+package com.artipie.docker.asto;
 
-import java.net.URI;
+import com.artipie.asto.FileStorage;
+import com.artipie.docker.RepoName;
+import java.nio.file.Paths;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
 
 /**
- * Registry reference path URI.
+ * Test case for {@link AstoDocker}.
  * @since 0.1
  */
-public interface RefPath {
+final class AstoDockerTest {
+    @Test
+    void createsAstoRepo() {
+        MatcherAssert.assertThat(
+            new AstoDocker(new FileStorage(Paths.get("/"))).repo(new RepoName.Simple("repo1")),
+            Matchers.instanceOf(AstoRepo.class)
+        );
+    }
 
-    /**
-     * URI path for reference.
-     * @return URI
-     */
-    URI path();
+    @Test
+    void createsAstoBlobStore() {
+        MatcherAssert.assertThat(
+            new AstoDocker(new FileStorage(Paths.get("/"))).blobStore(),
+            Matchers.instanceOf(AstoBlobs.class)
+        );
+    }
 }

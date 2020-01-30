@@ -22,9 +22,34 @@
  * SOFTWARE.
  */
 
+package com.artipie.docker.asto;
+
+import com.artipie.asto.FileStorage;
+import com.artipie.docker.Repo;
+import com.artipie.docker.RepoName;
+import com.artipie.docker.ref.ManifestRef;
+import java.nio.file.Path;
+import javax.json.JsonObject;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+
 /**
- * Tests for storage objects.
+ * Integration tests for {@link AstoRepo}.
  * @since 0.1
  */
-package com.artipie.docker.storage;
-
+final class AstoRepoITCase {
+    @Test
+    void readsManifestJson() throws Exception {
+        final Path dir = Path.of(
+            Thread.currentThread().getContextClassLoader()
+                .getResource("docker").toURI()
+        ).getParent();
+        final Repo repo = new AstoRepo(new FileStorage(dir), new RepoName.Simple("test"));
+        final JsonObject json = repo.manifest(new ManifestRef("1")).get();
+        MatcherAssert.assertThat(
+            json.getJsonObject("config").getString("digest"),
+            Matchers.is("sha256:e56378c5af5160fd8b7d8ad97a9c0aeef08ed31abcc431048c876602e1bdac4d")
+        );
+    }
+}

@@ -22,38 +22,40 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.storage;
+package com.artipie.docker.asto;
 
-import com.artipie.asto.FileStorage;
+import com.artipie.asto.Storage;
+import com.artipie.docker.BlobStore;
+import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.asto.AstoRepo;
-import com.artipie.docker.ref.ManifestRef;
-import java.nio.file.Path;
-import javax.json.JsonObject;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 
 /**
- * Integration tests for {@link AstoRepo}.
+ * Asto {@link Docker} implementation.
  * @since 0.1
  */
-public final class AstoRepoITCase {
+public final class AstoDocker implements Docker {
 
-    @Test
-    void readsManifestJson() throws Exception {
-        final Path dir = Path.of(
-            Thread.currentThread().getContextClassLoader()
-                .getResource("docker").toURI()
-        ).getParent();
-        final Repo repo = new AstoRepo(new FileStorage(dir));
-        final JsonObject json = repo.manifest(
-            new RepoName.Simple("test"), new ManifestRef("1")
-        ).get();
-        MatcherAssert.assertThat(
-            json.getJsonObject("config").getString("digest"),
-            Matchers.is("sha256:e56378c5af5160fd8b7d8ad97a9c0aeef08ed31abcc431048c876602e1bdac4d")
-        );
+    /**
+     * Asto storage.
+     */
+    private final Storage asto;
+
+    /**
+     * Ctor.
+     * @param asto Asto storage
+     */
+    public AstoDocker(final Storage asto) {
+        this.asto = asto;
+    }
+
+    @Override
+    public Repo repo(final RepoName name) {
+        return new AstoRepo(this.asto, name);
+    }
+
+    @Override
+    public BlobStore blobStore() {
+        return new AstoBlobs(this.asto);
     }
 }
