@@ -48,8 +48,8 @@ final class AstoBlobsITCase {
 
     @Test
     void saveBlobDataAtCorrectPath(@TempDir final Path tmp) throws Exception {
-        final ByteArray blob = new ByteArray(new byte[]{0x00, 0x01, 0x02, 0x03});
         final BlobStore blobs = new AstoBlobs(new FileStorage(tmp));
+        final ByteArray blob = new ByteArray(new byte[]{0x00, 0x01, 0x02, 0x03});
         final Digest digest = blobs.put(
             FlowAdapters.toFlowPublisher(Flowable.fromArray(blob.boxedBytes()))
         ).get();
@@ -74,8 +74,8 @@ final class AstoBlobsITCase {
 
     @Test
     void writeAndReadBlob(@TempDir final Path tmp) throws Exception {
-        final ByteArray blob = new ByteArray(new byte[]{0x05, 0x06, 0x07, 0x08});
         final BlobStore blobs = new AstoBlobs(new FileStorage(tmp));
+        final ByteArray blob = new ByteArray(new byte[]{0x05, 0x06, 0x07, 0x08});
         final Digest digest = blobs.put(
             FlowAdapters.toFlowPublisher(Flowable.fromArray(blob.boxedBytes()))
         ).get();

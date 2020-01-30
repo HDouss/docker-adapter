@@ -80,7 +80,11 @@ public final class AstoBlobs implements BlobStore {
 
     @Override
     public CompletableFuture<Flow.Publisher<Byte>> blob(final Digest digest) {
-        return this.asto.value(new Key.From(RegistryRoot.V2, new BlobRef(digest).string(), "data"));
+        return this.asto.value(
+            new Key.From(
+                RegistryRoot.V2, new BlobRef(digest).string(), "data"
+            )
+        );
     }
 
     @Override
