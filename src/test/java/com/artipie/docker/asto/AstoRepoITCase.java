@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 
-package com.artipie.docker.storage;
+package com.artipie.docker.asto;
 
 import com.artipie.asto.FileStorage;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.asto.AstoRepo;
 import com.artipie.docker.ref.ManifestRef;
 import java.nio.file.Path;
 import javax.json.JsonObject;
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.Test;
  * Integration tests for {@link AstoRepo}.
  * @since 0.1
  */
-public final class AstoRepoITCase {
+final class AstoRepoITCase {
     @Test
     void readsManifestJson() throws Exception {
         final Path dir = Path.of(

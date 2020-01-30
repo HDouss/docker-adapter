@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.docker.storage;
+package com.artipie.docker.asto;
 
 import com.artipie.asto.ByteArray;
 import com.artipie.asto.FileStorage;
 import com.artipie.docker.Digest;
-import com.artipie.docker.asto.AstoBlobs;
 import io.reactivex.rxjava3.core.Flowable;
 import java.nio.file.Files;
 import java.nio.file.Path;

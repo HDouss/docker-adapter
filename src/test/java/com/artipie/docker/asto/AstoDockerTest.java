@@ -22,9 +22,33 @@
  * SOFTWARE.
  */
 
+package com.artipie.docker.asto;
+
+import com.artipie.asto.FileStorage;
+import com.artipie.docker.RepoName;
+import java.nio.file.Paths;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+
 /**
- * Tests for storage objects.
+ * Test case for {@link AstoDocker}.
  * @since 0.1
  */
-package com.artipie.docker.storage;
+final class AstoDockerTest {
+    @Test
+    void createsAstoRepo() {
+        MatcherAssert.assertThat(
+            new AstoDocker(new FileStorage(Paths.get("/"))).repo(new RepoName.Simple("repo1")),
+            Matchers.instanceOf(AstoRepo.class)
+        );
+    }
 
+    @Test
+    void createsAstoBlobStore() {
+        MatcherAssert.assertThat(
+            new AstoDocker(new FileStorage(Paths.get("/"))).blobStore(),
+            Matchers.instanceOf(AstoBlobs.class)
+        );
+    }
+}
