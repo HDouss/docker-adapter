@@ -25,6 +25,7 @@ package com.artipie.docker.storage;
 
 import com.artipie.asto.ByteArray;
 import com.artipie.asto.FileStorage;
+import com.artipie.docker.BlobStore;
 import com.artipie.docker.Digest;
 import com.artipie.docker.asto.AstoBlobs;
 import io.reactivex.rxjava3.core.Flowable;
@@ -47,8 +48,9 @@ final class AstoBlobsITCase {
 
     @Test
     void saveBlobDataAtCorrectPath(@TempDir final Path tmp) throws Exception {
+        final BlobStore blobs = new AstoBlobs(new FileStorage(tmp));
         final ByteArray blob = new ByteArray(new byte[]{0x00, 0x01, 0x02, 0x03});
-        final Digest digest = new AstoBlobs(new FileStorage(tmp)).put(
+        final Digest digest = blobs.put(
             FlowAdapters.toFlowPublisher(Flowable.fromArray(blob.boxedBytes()))
         ).get();
         MatcherAssert.assertThat(
@@ -68,5 +70,19 @@ final class AstoBlobsITCase {
             ),
             Matchers.equalTo(blob.primitiveBytes())
         );
+    }
+
+    @Test
+    void writeAndReadBlob(@TempDir final Path tmp) throws Exception {
+        final BlobStore blobs = new AstoBlobs(new FileStorage(tmp));
+        final ByteArray blob = new ByteArray(new byte[]{0x05, 0x06, 0x07, 0x08});
+        final Digest digest = blobs.put(
+            FlowAdapters.toFlowPublisher(Flowable.fromArray(blob.boxedBytes()))
+        ).get();
+        final byte[] read = new ByteArray(
+            Flowable.fromPublisher(FlowAdapters.toPublisher(blobs.blob(digest).get()))
+                .toList().blockingGet()
+        ).primitiveBytes();
+        MatcherAssert.assertThat(read, Matchers.equalTo(blob.primitiveBytes()));
     }
 }
