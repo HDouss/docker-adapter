@@ -1,14 +1,10 @@
 ---
 docker:
   image: g4s8/rultor-jdk11:alpine3.10
-# @todo #1:30min Request access to settings from
-#  `yegor256/home/assets/artipie` to deploy the jar
-#  to maven central as com.artipie:docker artifact.
-
-# assets:
-#   settings.xml: yegor256/home#assets/artipie/settings.xml
-#   pubring.gpg: yegor256/home#assets/pubring.gpg
-#   secring.gpg: yegor256/home#assets/secring.gpg
+assets:
+  settings.xml: yegor256/home#assets/artipie/settings.xml
+  pubring.gpg: yegor256/home#assets/pubring.gpg
+  secring.gpg: yegor256/home#assets/secring.gpg
 install: |
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8
