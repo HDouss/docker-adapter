@@ -24,17 +24,16 @@
 
 package com.artipie.docker.asto;
 
-import com.artipie.asto.ByteArray;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.fs.RxFile;
 import com.artipie.docker.BlobStore;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ref.BlobRef;
-import hu.akarnokd.rxjava3.jdk8interop.SingleInterop;
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.internal.operators.flowable.FlowableFromPublisher;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.internal.operators.flowable.FlowableFromPublisher;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -61,11 +60,6 @@ import org.reactivestreams.FlowAdapters;
 public final class AstoBlobs implements BlobStore {
 
     /**
-     * Default buffer size for put publisher.
-     */
-    private static final int PUB_BUF_SIZE = 8192;
-
-    /**
      * Storage.
      */
     private final Storage asto;
@@ -79,7 +73,7 @@ public final class AstoBlobs implements BlobStore {
     }
 
     @Override
-    public CompletableFuture<Flow.Publisher<Byte>> blob(final Digest digest) {
+    public CompletableFuture<Flow.Publisher<ByteBuffer>> blob(final Digest digest) {
         return this.asto.value(
             new Key.From(
                 RegistryRoot.V2, new BlobRef(digest).string(), "data"
@@ -89,7 +83,7 @@ public final class AstoBlobs implements BlobStore {
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public CompletableFuture<Digest> put(final Flow.Publisher<Byte> blob) {
+    public CompletableFuture<Digest> put(final Flow.Publisher<ByteBuffer> blob) {
         final MessageDigest sha;
         try {
             sha = MessageDigest.getInstance("SHA-256");
@@ -105,16 +99,19 @@ public final class AstoBlobs implements BlobStore {
             return CompletableFuture.failedFuture(err);
         }
         return new FlowableFromPublisher<>(FlowAdapters.toPublisher(blob))
-            .buffer(AstoBlobs.PUB_BUF_SIZE)
-            .map(buf -> new ByteArray(buf).primitiveBytes())
             .flatMapCompletable(
                 buf -> Completable.mergeArray(
-                    Completable.fromAction(() -> sha.update(buf)),
                     Completable.fromAction(
                         () -> {
-                            final ByteBuffer wrap = ByteBuffer.wrap(buf);
-                            while (wrap.hasRemaining()) {
-                                out.write(wrap);
+                            buf.mark();
+                            sha.update(buf);
+                            buf.reset();
+                        }
+                    ),
+                    Completable.fromAction(
+                        () -> {
+                            while (buf.hasRemaining()) {
+                                out.write(buf);
                             }
                         }
                     )
@@ -127,9 +124,7 @@ public final class AstoBlobs implements BlobStore {
                 digest -> SingleInterop.fromFuture(
                     this.asto.save(
                         new Key.From(RegistryRoot.V2, new BlobRef(digest).string(), "data"),
-                        FlowAdapters.toFlowPublisher(
-                            Flowable.fromArray(new ByteArray(Files.readAllBytes(tmp)).boxedBytes())
-                        )
+                        FlowAdapters.toFlowPublisher(new RxFile(tmp).flow())
                     ).thenApply(none -> digest)
                 )
             ).doOnTerminate(() -> Files.delete(tmp))

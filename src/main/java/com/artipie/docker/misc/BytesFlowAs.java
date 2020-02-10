@@ -24,17 +24,23 @@
 
 package com.artipie.docker.misc;
 
-import java.io.ByteArrayInputStream;
+import com.artipie.asto.Remaining;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import javax.json.Json;
+import javax.json.JsonStructure;
 
 /**
  * This class represents {@link Flow.Subscriber} as converted value.
@@ -45,22 +51,22 @@ public abstract class BytesFlowAs<T> {
     /**
      * Byte flow.
      */
-    private final Flow.Publisher<Byte> flow;
+    private final Flow.Publisher<ByteBuffer> flow;
 
     /**
-     * Function to convert byte flow to new type.
+     * Byte chunks accumulator.
      */
-    private final Function<byte[], T> func;
+    private final Accumulator<T> accum;
 
     /**
      * Ctor.
-     * @param flow Flow of bytes
-     * @param func Function to convert bytes to target type
+     * @param flow Flow of byte chunks
+     * @param accum Byte chunks accumulator
      */
-    protected BytesFlowAs(final Flow.Publisher<Byte> flow,
-        final Function<byte[], T> func) {
+    protected BytesFlowAs(final Flow.Publisher<ByteBuffer> flow,
+        final Accumulator<T> accum) {
         this.flow = flow;
-        this.func = func;
+        this.accum = accum;
     }
 
     /**
@@ -69,7 +75,7 @@ public abstract class BytesFlowAs<T> {
      */
     public final CompletableFuture<T> future() {
         final CompletableFuture<T> future = new CompletableFuture<>();
-        this.flow.subscribe(new FutureSubscriber<>(future, this.func));
+        this.flow.subscribe(new FutureSubscriber<>(future, this.accum));
         return future;
     }
 
@@ -78,12 +84,7 @@ public abstract class BytesFlowAs<T> {
      * @param <T> Target type
      * @since 0.1
      */
-    private static final class FutureSubscriber<T> implements Flow.Subscriber<Byte> {
-
-        /**
-         * Buffer size.
-         */
-        private static final int BUF_SIZE = 1024;
+    private static final class FutureSubscriber<T> implements Flow.Subscriber<ByteBuffer> {
 
         /**
          * Future.
@@ -91,9 +92,9 @@ public abstract class BytesFlowAs<T> {
         private final CompletableFuture<T> future;
 
         /**
-         * Function to convert bytes to target type.
+         * Byte chunks accumulator.
          */
-        private final Function<byte[], T> func;
+        private final Accumulator<T> accum;
 
         /**
          * Subscription.
@@ -101,21 +102,15 @@ public abstract class BytesFlowAs<T> {
         private final AtomicReference<Subscription> sub;
 
         /**
-         * Byte buffer.
-         */
-        private final List<Byte> buf;
-
-        /**
          * Ctor.
          * @param future Result future
-         * @param func Function to converty btyes to target
+         * @param accum Bytes chunks accumulator
          */
         FutureSubscriber(final CompletableFuture<T> future,
-            final Function<byte[], T> func) {
+            final Accumulator<T> accum) {
             this.future = future;
-            this.func = func;
-            this.buf = new ArrayList<>(BytesFlowAs.FutureSubscriber.BUF_SIZE);
             this.sub = new AtomicReference<>();
+            this.accum = accum;
         }
 
         @Override
@@ -123,17 +118,19 @@ public abstract class BytesFlowAs<T> {
             if (!this.sub.compareAndSet(null, subs)) {
                 throw new IllegalStateException("flow already subscribed");
             }
-            subs.request(BytesFlowAs.FutureSubscriber.BUF_SIZE);
+            subs.request(Long.MAX_VALUE);
         }
 
         @Override
-        public void onNext(final Byte item) {
+        public void onNext(final ByteBuffer chunk) {
             if (this.future.isCancelled()) {
                 this.sub.get().cancel();
             }
-            this.buf.add(item);
-            if (this.buf.size() % BytesFlowAs.FutureSubscriber.BUF_SIZE == 0) {
-                this.sub.get().request(BytesFlowAs.FutureSubscriber.BUF_SIZE);
+            try {
+                this.accum.accept(chunk);
+            } catch (final IOException err) {
+                this.sub.get().cancel();
+                this.future.completeExceptionally(err);
             }
         }
 
@@ -143,35 +140,50 @@ public abstract class BytesFlowAs<T> {
         }
 
         @Override
-        @SuppressWarnings("PMD.AvoidCatchingThrowable")
         public void onComplete() {
-            final byte[] arr = new byte[this.buf.size()];
-            for (int pos = 0; pos < this.buf.size(); ++pos) {
-                arr[pos] = this.buf.get(pos);
-            }
             try {
-                final T target = this.func.apply(arr);
-                this.future.complete(target);
-                // @checkstyle IllegalCatchCheck (1 line)
-            } catch (final Throwable err) {
+                this.future.complete(this.accum.value());
+            } catch (final IOException err) {
                 this.future.completeExceptionally(err);
             }
         }
     }
 
     /**
+     * Accumulator for incomiing bytes chunks.
+     * @param <T> Target type
+     * @since 1.0
+     */
+    public interface Accumulator<T> {
+
+        /**
+         * Accept bytes chunk.
+         * @param buf Chang buffer
+         * @throws IOException On error
+         */
+        void accept(ByteBuffer buf) throws IOException;
+
+        /**
+         * Get the value.
+         * @return Value
+         * @throws IOException On error
+         */
+        T value() throws IOException;
+    }
+
+    /**
      * Bytes flow as Json object.
      * @since 0.1
      */
-    public static final class JsonObject extends BytesFlowAs<javax.json.JsonObject> {
+    public static final class JsonObject extends BytesFlowAs<JsonStructure> {
         /**
          * Ctor.
          * @param flow Bytes flow
          */
-        public JsonObject(final Flow.Publisher<Byte> flow) {
+        public JsonObject(final Flow.Publisher<ByteBuffer> flow) {
             super(
                 flow,
-                bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
+                new BytesFlowAs.StreamAccum<>(inp -> Json.createReader(inp).read())
             );
         }
     }
@@ -186,7 +198,7 @@ public abstract class BytesFlowAs<T> {
          * Bytes as text with UTF-8 encoding.
          * @param flow Bytes flow
          */
-        public Text(final Flow.Publisher<Byte> flow) {
+        public Text(final Flow.Publisher<ByteBuffer> flow) {
             this(flow, StandardCharsets.UTF_8);
         }
 
@@ -195,8 +207,62 @@ public abstract class BytesFlowAs<T> {
          * @param flow Bytes flow
          * @param charset Text encoding
          */
-        public Text(final Flow.Publisher<Byte> flow, final Charset charset) {
-            super(flow, bytes -> new String(bytes, charset));
+        public Text(final Flow.Publisher<ByteBuffer> flow, final Charset charset) {
+            super(
+                flow,
+                new BytesFlowAs.StreamAccum<>(
+                    inp -> new Scanner(inp, charset).useDelimiter("\\A").next()
+                )
+            );
+        }
+    }
+
+    /**
+     * Input stream accumulator.
+     * @param <T> Target type
+     * @since 1.0
+     */
+    private static final class StreamAccum<T> implements BytesFlowAs.Accumulator<T> {
+
+        /**
+         * Input pipe.
+         */
+        private final PipedInputStream inp;
+
+        /**
+         * Output pipe.
+         */
+        private final PipedOutputStream out;
+
+        /**
+         * Function to convert input stream tot target object.
+         */
+        private final Function<InputStream, T> func;
+
+        /**
+         * Ctor.
+         * @param func Accumulator function
+         */
+        @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
+        StreamAccum(final Function<InputStream, T> func) {
+            this.func = func;
+            this.out = new PipedOutputStream();
+            try {
+                this.inp = new PipedInputStream(this.out);
+            } catch (final IOException err) {
+                throw new UncheckedIOException(err);
+            }
+        }
+
+        @Override
+        public void accept(final ByteBuffer buf) throws IOException {
+            this.out.write(new Remaining(buf).bytes());
+        }
+
+        @Override
+        public T value() throws IOException {
+            this.out.close();
+            return this.func.apply(this.inp);
         }
     }
 }
