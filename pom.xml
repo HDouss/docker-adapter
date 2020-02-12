@@ -89,23 +89,6 @@ SOFTWARE.
       <artifactId>javax.json</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--
-      @todo #52:30min Current junit version in parent pom 5.4.x
-       has a bug with TempDir annotation on Windows
-       https://github.com/junit-team/junit5/issues/2046
-       update dependencies in parent pom and remove these explicit
-       dependency versions.
-    -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>5.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.6.0</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
