@@ -150,7 +150,7 @@ public abstract class BytesFlowAs<T> {
     }
 
     /**
-     * Accumulator for incomiing bytes chunks.
+     * Accumulator for incoming bytes chunks.
      * @param <T> Target type
      * @since 1.0
      */
@@ -235,7 +235,7 @@ public abstract class BytesFlowAs<T> {
         private final PipedOutputStream out;
 
         /**
-         * Function to convert input stream tot target object.
+         * Function to convert input stream to target object.
          */
         private final Function<InputStream, T> func;
 
@@ -243,15 +243,10 @@ public abstract class BytesFlowAs<T> {
          * Ctor.
          * @param func Accumulator function
          */
-        @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
         StreamAccum(final Function<InputStream, T> func) {
             this.func = func;
             this.out = new PipedOutputStream();
-            try {
-                this.inp = new PipedInputStream(this.out);
-            } catch (final IOException err) {
-                throw new UncheckedIOException(err);
-            }
+            this.inp = StreamAccum.pipedInput(this.out);
         }
 
         @Override
@@ -263,6 +258,19 @@ public abstract class BytesFlowAs<T> {
         public T value() throws IOException {
             this.out.close();
             return this.func.apply(this.inp);
+        }
+
+        /**
+         * Create new piped input stream from output stream.
+         * @param out Pipe output
+         * @return Pipe input
+         */
+        private static PipedInputStream pipedInput(final PipedOutputStream out) {
+            try {
+                return new PipedInputStream(out);
+            } catch (final IOException err) {
+                throw new UncheckedIOException(err);
+            }
         }
     }
 }
