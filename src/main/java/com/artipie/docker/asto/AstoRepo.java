@@ -77,6 +77,7 @@ public final class AstoRepo implements Repo {
             .thenApply(Digest.FromLink::new)
             .thenApply(digest -> new Key.From(new BlobRef(digest), "data"))
             .thenCompose(blob -> this.asto.value(new Key.From(RegistryRoot.V2, blob.string())))
-            .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future());
+            .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future())
+            .thenApply(struct -> struct.asJsonObject());
     }
 }

@@ -23,8 +23,8 @@
  */
 package com.artipie.docker.misc;
 
-import com.artipie.asto.ByteArray;
-import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.Flowable;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -45,9 +45,7 @@ final class BytesFlowAsTest {
         MatcherAssert.assertThat(
             new BytesFlowAs.Text(
                 FlowAdapters.toFlowPublisher(
-                    Flowable.fromArray(
-                        new ByteArray(txt.getBytes(StandardCharsets.UTF_8)).boxedBytes()
-                    )
+                    Flowable.fromArray(ByteBuffer.wrap(txt.getBytes(StandardCharsets.UTF_8)))
                 ),
                 StandardCharsets.UTF_8
             ).future().get(),
@@ -64,8 +62,7 @@ final class BytesFlowAsTest {
             new BytesFlowAs.JsonObject(
                 FlowAdapters.toFlowPublisher(
                     Flowable.fromArray(
-                        new ByteArray(json.toString().getBytes(StandardCharsets.UTF_8))
-                            .boxedBytes()
+                        ByteBuffer.wrap(json.toString().getBytes(StandardCharsets.UTF_8))
                     )
                 )
             ).future().get(),

@@ -24,7 +24,7 @@
 
 package com.artipie.docker.asto;
 
-import com.artipie.asto.FileStorage;
+import com.artipie.asto.fs.FileStorage;
 import com.artipie.docker.RepoName;
 import java.nio.file.Paths;
 import org.hamcrest.MatcherAssert;
