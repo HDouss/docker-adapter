@@ -24,15 +24,18 @@
 
 package com.artipie.docker.asto;
 
+import com.artipie.asto.Remaining;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.ref.ManifestRef;
+import io.reactivex.Flowable;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.FlowAdapters;
 
 /**
  * Integration tests for {@link AstoRepo}.
@@ -46,10 +49,18 @@ final class AstoRepoITCase {
                 .getResource("docker").toURI()
         ).getParent();
         final Repo repo = new AstoRepo(new FileStorage(dir), new RepoName.Simple("test"));
-        final JsonObject json = repo.manifest(new ManifestRef("1")).get();
-        MatcherAssert.assertThat(
-            json.getJsonObject("config").getString("digest"),
-            Matchers.is("sha256:e56378c5af5160fd8b7d8ad97a9c0aeef08ed31abcc431048c876602e1bdac4d")
-        );
+        final byte[] content = new Remaining(
+            Flowable.fromPublisher(FlowAdapters.toPublisher(repo.manifest(new ManifestRef("1"))))
+                .toList()
+                .blockingGet()
+                .stream()
+                .reduce(
+                    (left, right) -> ByteBuffer.allocate(left.remaining() + right.remaining())
+                        .put(left)
+                        .put(right)
+                ).orElse(ByteBuffer.allocate(0))
+        ).bytes();
+        // @checkstyle MagicNumberCheck (1 line)
+        MatcherAssert.assertThat(content.length, Matchers.equalTo(942));
     }
 }

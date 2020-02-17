@@ -25,8 +25,8 @@
 package com.artipie.docker;
 
 import com.artipie.docker.ref.ManifestRef;
-import java.util.concurrent.CompletableFuture;
-import javax.json.JsonObject;
+import java.nio.ByteBuffer;
+import java.util.concurrent.Flow;
 
 /**
  * Docker repository files and metadata.
@@ -52,5 +52,5 @@ public interface Repo {
      * @param link Manifest reference link
      * @return Future with manifest JSON object
      */
-    CompletableFuture<JsonObject> manifest(ManifestRef link);
+    Flow.Publisher<ByteBuffer> manifest(ManifestRef link);
 }
