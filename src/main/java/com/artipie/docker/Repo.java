@@ -50,7 +50,7 @@ public interface Repo {
     /**
      * Resolve docker image manifest file by reference link.
      * @param link Manifest reference link
-     * @return Future with manifest JSON object
+     * @return Flow with manifest data
      */
     Flow.Publisher<ByteBuffer> manifest(ManifestRef link);
 }
