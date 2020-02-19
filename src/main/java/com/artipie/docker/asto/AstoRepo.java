@@ -32,8 +32,10 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.BytesFlowAs;
 import com.artipie.docker.ref.BlobRef;
 import com.artipie.docker.ref.ManifestRef;
-import java.util.concurrent.CompletableFuture;
-import javax.json.JsonObject;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscriber;
 
 /**
  * Asto implementation of {@link Repo}.
@@ -67,17 +69,46 @@ public final class AstoRepo implements Repo {
     }
 
     @Override
-    public CompletableFuture<JsonObject> manifest(final ManifestRef link) {
+    public Flow.Publisher<ByteBuffer> manifest(final ManifestRef link) {
         final Key key = new Key.From(
             RegistryRoot.V2, "repositories", this.name.value(),
             "_manifests", link.string()
         );
-        return this.asto.value(key)
+        return new AstoRepo.PubFromFuture<>(
+            this.asto.value(key)
             .thenCompose(pub -> new BytesFlowAs.Text(pub).future())
             .thenApply(Digest.FromLink::new)
             .thenApply(digest -> new Key.From(new BlobRef(digest), "data"))
             .thenCompose(blob -> this.asto.value(new Key.From(RegistryRoot.V2, blob.string())))
-            .thenCompose(pub -> new BytesFlowAs.JsonObject(pub).future())
-            .thenApply(struct -> struct.asJsonObject());
+        );
+    }
+
+    /**
+     * Flow publisher from future.
+     * @param <T> Publisher type
+     * @since 1.0
+     * @todo #57:30min Extract this class from AstoRepo.
+     *  Maybe move it to separate library, since it's not related to
+     *  artipie docker library.
+     */
+    private static final class PubFromFuture<T> implements Flow.Publisher<T> {
+
+        /**
+         * Async pubisher.
+         */
+        private final CompletionStage<Flow.Publisher<T>> source;
+
+        /**
+         * Ctor.
+         * @param source Future of publisher
+         */
+        PubFromFuture(final CompletionStage<Flow.Publisher<T>> source) {
+            this.source = source;
+        }
+
+        @Override
+        public void subscribe(final Subscriber<? super T> sub) {
+            this.source.thenAccept(pub -> pub.subscribe(sub));
+        }
     }
 }
